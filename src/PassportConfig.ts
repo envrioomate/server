@@ -22,7 +22,7 @@ passport.deserializeUser((id, done) => {
     });
 });
 
-passport.use( new LocalStrategy ( {
+passport.use( "local", new LocalStrategy ( {
         usernameField: 'username',
         passwordField: 'password'
     },
@@ -38,7 +38,7 @@ passport.use( new LocalStrategy ( {
     }
 ));
 
-passport.use( new JwtStrategy ( {
+passport.use("token", new JwtStrategy ( {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.API_SECRET || config.tokenSecret
     }, (jwtPayload, done: Function) => {
@@ -51,7 +51,7 @@ passport.use( new JwtStrategy ( {
     }
 ));
 
-passport.use(new BasicStrategy(
+passport.use('basic', new BasicStrategy(
     function(userid, password, done) {
         getRepository(User).findOne({userName: userid}).then(user => {
             if(user == null) {

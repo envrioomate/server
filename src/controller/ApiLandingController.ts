@@ -39,6 +39,7 @@ router.post('/login', passport.authenticate('local', {session: false}), (req: Re
 });
 
 router.get('/checkToken', passport.authenticate('local', {session: false}), (req: Request, res: Response, done: Function) => {
+    res.status(204);
     done();
 });
 
