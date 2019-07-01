@@ -38,6 +38,11 @@ router.post('/login', passport.authenticate('local', {session: false}), (req: Re
     done();
 });
 
+router.get('/checkToken', passport.authenticate('local', {session: false}), (req: Request, res: Response, done: Function) => {
+    done();
+});
+
+
 router.get('/checkEmail', async (request: Request, response: Response, done: Function) => {
     const userName = request.query.username;
     getRepository(User).findOne({userName: userName}).then(async (user) => {
