@@ -38,7 +38,7 @@ router.post('/login', passport.authenticate('local', {session: false}), (req: Re
     done();
 });
 
-router.get('/checkToken', passport.authenticate('local', {session: false}), (req: Request, res: Response, done: Function) => {
+router.get('/checkToken', passport.authenticate('jwt', {session: false}), async (req: Request, res: Response, done: Function) => {
     res.status(204);
     done();
 });
