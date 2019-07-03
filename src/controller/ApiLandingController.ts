@@ -38,11 +38,16 @@ router.post('/login', passport.authenticate('local', {session: false}), (req: Re
     done();
 });
 
+//router.get('/checkToken', passport.authenticate('jwt', {session: false}), (req: Request, res: Response, done: Function) => {
+//    res.status(204);
+//    done();
+//});
+
 router.get('/checkToken', passport.authenticate('jwt', {session: false}), async (req: Request, res: Response, done: Function) => {
     res.status(204);
+    res.json({status: true});
     done();
 });
-
 
 router.get('/checkEmail', async (request: Request, response: Response, done: Function) => {
     const userName = request.query.username;
