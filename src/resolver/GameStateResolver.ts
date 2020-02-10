@@ -30,7 +30,7 @@ export class GameStateResolver {
     }
 
     @Mutation(returns => ChallengeCompletion, {nullable: true})
-    async completeChallenge(@Ctx() {user}, @Arg("challengeId", type => Int) challengeId: number, @Arg("challengeGoalCompletionLevel", type => Int) challengeGoalCompletionLevel: number, @Arg("challengeCompletionQuantity", type => Number) challengeCompletionQuantity: number): Promise<ChallengeCompletion> {
+    async completeChallenge(@Ctx() {user}, @Arg("challengeId", type => Int) challengeId: number, @Arg("challengeGoalCompletionLevel", type => Int, {nullable: true}) challengeGoalCompletionLevel?: number, @Arg("challengeCompletionQuantity", type => Number, {nullable: true}) challengeCompletionQuantity?: number): Promise<ChallengeCompletion> {
         return this.mgmr.completeChallenge(user, challengeId, challengeGoalCompletionLevel, challengeCompletionQuantity)
     }
 
