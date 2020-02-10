@@ -5,7 +5,7 @@ import {SeasonPlanChallenge} from "./SeasonPlanChallenge";
 import {ChallengeReplacement} from "./ChallengeReplacement";
 
 export enum ChallengeGoalCompletionLevel {
-    MIN, MED, GOOD, MAX
+    MIN = 0, MED = 1, GOOD = 2, MAX = 3
 }
 
 registerEnumType(ChallengeGoalCompletionLevel, {

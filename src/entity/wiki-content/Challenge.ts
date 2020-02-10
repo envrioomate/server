@@ -7,9 +7,9 @@ import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {WikiImage} from "./WikiImage";
 
 export enum ChallengeGoalType {
-    QUANTITY_ASC,
-    QUANTITY_DSC,
-    QUALITATIVE
+    QUALITATIVE = 0,
+    QUANTITY_ASC = 1,
+    QUANTITY_DSC = 2
 }
 
 registerEnumType(ChallengeGoalType, {
