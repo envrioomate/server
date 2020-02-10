@@ -1,19 +1,60 @@
-import {
-    Column,
-    CreateDateColumn,
-    Entity, JoinTable,
-    ManyToMany,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
-} from "typeorm";
+import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
 import {Themenwoche} from "./Themenwoche";
 import {Props} from "./Props";
 import {Kategorie} from "./Kategorie";
 import {Oberthema} from "./Oberthema";
-import {Field, Int, ObjectType} from "type-graphql";
-import {Media} from "../Media";
+import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {WikiImage} from "./WikiImage";
+
+enum ChallengeGoalType {
+    QUANTITY_ASC,
+    QUANTITY_DSC,
+    QUALITATIVE
+}
+
+registerEnumType(ChallengeGoalType, {
+    name: "ChallengeGoalType",
+    description: "Defines how ChallengeGoals are ordered by their quantity."
+});
+
+@ObjectType()
+export class ChallengeGoals {
+
+    @Field(type => ChallengeGoalType)
+    @Column()
+    challengeGoalType: ChallengeGoalType;
+
+    @Field(type => String)
+    @Column()
+    minCompletion: String;
+
+    @Field(type => Number)
+    @Column()
+    minQuantity: number;
+
+    @Field(type => String)
+    @Column()
+    medCompletion: String;
+
+    @Field(type => Number)
+    @Column()
+    medQuantity: number;
+
+    @Field(type => String)
+    @Column()
+    goodCompletion: String;
+
+    @Field(type => Number)
+    @Column()
+    goodQuantity: number;
+    @Field(type => String)
+    @Column()
+    maxCompletion: String;
+
+    @Field(type => Number)
+    @Column()
+    maxQuantity: number;
+}
 
 @Entity()
 @ObjectType()
@@ -70,6 +111,10 @@ export class Challenge {
     @Field(type => WikiImage, {nullable: true})
     @ManyToOne(type => WikiImage)
     headerImage: Promise<WikiImage>;
+
+    @Field(type => ChallengeGoals, {nullable: true})
+    @Column(type => ChallengeGoals)
+    challengeGoals: Promise<ChallengeGoals>;
 
     headerImageUrl?: string;
 

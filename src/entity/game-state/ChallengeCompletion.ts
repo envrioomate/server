@@ -1,8 +1,18 @@
-import {CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {Field, Int, ObjectType} from "type-graphql";
+import {Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {User} from "../user/User";
 import {SeasonPlanChallenge} from "./SeasonPlanChallenge";
 import {ChallengeReplacement} from "./ChallengeReplacement";
+
+enum ChallengeGoalCompletionLevel {
+    MIN, MED, GOOD, MAX
+}
+
+registerEnumType(ChallengeGoalCompletionLevel, {
+    name: "ChallengeGoalCompletionLevel",
+    description: "Stores the achieved ChallengeGoal. If null assume MIN"
+});
+
 
 @Entity()
 @ObjectType()
@@ -31,5 +41,14 @@ export class ChallengeCompletion {
     @Field(type => ChallengeReplacement, {nullable: true})
     @OneToOne(type => ChallengeReplacement, s => s.completion, {nullable: true})
     replacementChallenge: Promise<ChallengeReplacement>
+
+    @Field(type => ChallengeGoalCompletionLevel, {nullable: true})
+    @Column()
+    challengeGoalCompletionLevel: ChallengeGoalCompletionLevel;
+
+    @Field(type => Number, {nullable: true})
+    @Column()
+    challengeCompletionQuantity: number; //null if qualitative Challenge
+
 
 }
