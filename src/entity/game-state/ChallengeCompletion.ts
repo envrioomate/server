@@ -4,7 +4,7 @@ import {User} from "../user/User";
 import {SeasonPlanChallenge} from "./SeasonPlanChallenge";
 import {ChallengeReplacement} from "./ChallengeReplacement";
 
-enum ChallengeGoalCompletionLevel {
+export enum ChallengeGoalCompletionLevel {
     MIN, MED, GOOD, MAX
 }
 
