@@ -1,6 +1,6 @@
 import {Container, Service} from "typedi";
 import {Challenge} from "../entity/wiki-content/Challenge";
-import {ChallengeCompletion} from "../entity/game-state/ChallengeCompletion";
+import {ChallengeCompletion, ChallengeGoalCompletionLevel} from "../entity/game-state/ChallengeCompletion";
 import {SeasonPlanChallenge} from "../entity/game-state/SeasonPlanChallenge";
 import {InjectRepository} from "typeorm-typedi-extensions";
 import {EntitySubscriberInterface, EventSubscriber, In, InsertEvent, LessThan, MoreThan, Repository} from "typeorm";
@@ -177,7 +177,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         }, undefined)
     }
 
-    public async completeChallenge(user: User, seasonPlanChallengeId: number): Promise<ChallengeCompletion> {
+    public async completeChallenge(user: User, seasonPlanChallengeId: number, challengeGoalCompletionLevel: ChallengeGoalCompletionLevel, challengeCompletionQuantity: number): Promise<ChallengeCompletion> {
         let seasonPlanChallenge: SeasonPlanChallenge = await this.getSeasonPlanChallengeFromCurrentSeasonPlanById(seasonPlanChallengeId);
         // check the spc exists
         if (!seasonPlanChallenge) return Promise.reject("SeasonPlanChallenge not found in current SeasonPlan!");
@@ -199,6 +199,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         let challengeCompletion: ChallengeCompletion = new ChallengeCompletion();
         challengeCompletion.owner = Promise.resolve(user);
         challengeCompletion.seasonPlanChallenge = Promise.resolve(seasonPlanChallenge);
+        challengeCompletion.challengeGoalCompletionLevel = challengeGoalCompletionLevel;
+        challengeCompletion.challengeCompletionQuantity = challengeCompletionQuantity;
         challengeCompletion = await this.challengeCompletionRepository.save(challengeCompletion);
         publish(challengeCompletion, "add", true);
         return challengeCompletion;

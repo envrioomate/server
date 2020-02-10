@@ -6,7 +6,7 @@ import {Oberthema} from "./Oberthema";
 import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {WikiImage} from "./WikiImage";
 
-enum ChallengeGoalType {
+export enum ChallengeGoalType {
     QUANTITY_ASC,
     QUANTITY_DSC,
     QUALITATIVE
