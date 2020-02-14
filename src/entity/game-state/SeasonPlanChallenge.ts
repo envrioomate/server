@@ -2,7 +2,7 @@ import {Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 import {Ctx, Field, Int, ObjectType} from "type-graphql";
 import {ChallengeCompletion} from "./ChallengeCompletion";
 import {SeasonPlan} from "./SeasonPlan";
-import {Challenge} from "../wiki-content/Challenge";
+import {Badge} from "../wiki-content/Badge";
 import {ChallengeRejection} from "./ChallengeRejection";
 import {IUserChallenge} from "./IUserChallenge";
 import {Context} from "../../resolver/types/Context";
@@ -27,9 +27,9 @@ export class SeasonPlanChallenge extends IUserChallenge {
     @ManyToOne(type => SeasonPlan, { onDelete: 'SET NULL' })
     plan: Promise<SeasonPlan>;
 
-    @Field(type => Challenge)
-    @ManyToOne(type => Challenge,{ onDelete: 'SET NULL' })
-    challenge: Promise<Challenge>;
+    @Field(type => Badge)
+    @ManyToOne(type => Badge,{ onDelete: 'SET NULL' })
+    challenge: Promise<Badge>;
 
     @Field(type => ChallengeCompletion, {nullable: true})
     async challengeCompletion(@Ctx() {user}: Context): Promise<ChallengeCompletion> {

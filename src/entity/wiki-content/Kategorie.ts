@@ -9,8 +9,8 @@ import {
 } from "typeorm";
 import {Oberthema} from "./Oberthema";
 import {Props} from "./Props";
-import {Challenge} from "./Challenge";
-import {Themenwoche} from "./Themenwoche";
+import {Badge} from "./Badge";
+import {Thema} from "./Thema";
 import {Field, ObjectType} from "type-graphql";
 
 @Entity()
@@ -25,9 +25,6 @@ export class Kategorie {
     @OneToMany(type => Oberthema, o => o.kategorie, {eager: true})
     oberthemen: Promise<Oberthema[]>;
 
-    @Field(type => [Themenwoche])
-    @OneToMany(type => Themenwoche, t => t.kategorie)
-    themenWochen: Promise<Themenwoche[]>;
 
     @Field(type => Date)
     @CreateDateColumn()
@@ -37,20 +34,14 @@ export class Kategorie {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @Field(type => [Challenge])
-    @ManyToMany(type => Challenge, {eager: true})
+    @Field(type => [Badge])
+    @ManyToMany(type => Badge, {eager: true})
     @JoinTable()
-    challenges: Promise<Challenge[]>;
+    challenges: Promise<Badge[]>;
 
     @Field(type => Props)
     @ManyToOne(type => Props)
     props: Promise<Props>;
 
-    static fromWeekTemplate(templateValues: any): Kategorie {
-        let kategorie = new Kategorie();
-        kategorie.oberthemen = Promise.resolve([]);
-        kategorie.challenges = Promise.resolve([]);
-        kategorie.name = templateValues.Kategorie;
-        return kategorie;
-    }
+
 }

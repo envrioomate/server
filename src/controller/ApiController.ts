@@ -6,7 +6,7 @@ import * as bodyParser from "body-parser"
 import * as Url from "url";
 import * as QueryString from "querystring";
 import {query} from "express-validator/check";
-import {Challenge} from "../entity/wiki-content/Challenge";
+import {Badge} from "../entity/wiki-content/Badge";
 import {arraysAreEqual} from "tslint/lib/utils";
 import {Membership} from "../entity/social/Membership";
 import {loadConfigurationFromPath} from "tslint/lib/configuration";
@@ -70,8 +70,8 @@ router.get("/current-challenge", async (request: Request, response: Response, do
     done()
 });
 
-async function getCurrentChallenge(): Promise<Challenge> {
-    let c = await getRepository(Challenge).findOne({where: {active: 1}});
+async function getCurrentChallenge(): Promise<Badge> {
+    let c = await getRepository(Badge).findOne({where: {active: 1}});
     return c;
 }
 

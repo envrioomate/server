@@ -204,9 +204,9 @@ require([
     });
 
     /**
-     * Add navigation items by analyzing the HTML content and searching for h1 and h2 tags
+     * Add navigation items by analyzing the HTML text and searching for h1 and h2 tags
      * @param nav Object the navigation array
-     * @param content string the compiled HTML content
+     * @param content string the compiled HTML text
      * @param index where to insert items
      * @return boolean true if any good-looking (i.e. with a group identifier) <h1> tag was found
      */
@@ -251,7 +251,7 @@ require([
 
     // Mainmenu Header entry
     if (apiProject.header) {
-        var found_level1 = add_nav(nav, apiProject.header.content, 0); // Add level 1 and 2 titles
+        var found_level1 = add_nav(nav, apiProject.header.text, 0); // Add level 1 and 2 titles
         if (!found_level1) {    // If no Level 1 tags were found, make a title
             nav.unshift({
                 group: '_',
@@ -265,7 +265,7 @@ require([
     // Mainmenu Footer entry
     if (apiProject.footer) {
         var last_nav_index = nav.length;
-        var found_level1 = add_nav(nav, apiProject.footer.content, nav.length); // Add level 1 and 2 titles
+        var found_level1 = add_nav(nav, apiProject.footer.text, nav.length); // Add level 1 and 2 titles
         if (!found_level1 && apiProject.footer.title != null) {    // If no Level 1 tags were found, make a title
             nav.splice(last_nav_index, 0, {
                 group: '_footer',

@@ -1,5 +1,5 @@
 import {Container, Service} from "typedi";
-import {Challenge} from "../entity/wiki-content/Challenge";
+import {Badge} from "../entity/wiki-content/Badge";
 import {ChallengeCompletion, ChallengeGoalCompletionLevel} from "../entity/game-state/ChallengeCompletion";
 import {SeasonPlanChallenge} from "../entity/game-state/SeasonPlanChallenge";
 import {InjectRepository} from "typeorm-typedi-extensions";
@@ -98,7 +98,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     constructor(
         @InjectRepository(Season) private readonly seasonRepository: Repository<Season>,
         @InjectRepository(SeasonPlan) private readonly seasonPlanRepository: Repository<SeasonPlan>,
-        @InjectRepository(Challenge) private readonly challengeRepository: Repository<Challenge>,
+        @InjectRepository(Badge) private readonly challengeRepository: Repository<Badge>,
         @InjectRepository(SeasonPlanChallenge) private readonly seasonPlanChallengeRepository: Repository<SeasonPlanChallenge>,
         @InjectRepository(ChallengeCompletion) private readonly challengeCompletionRepository: Repository<ChallengeCompletion>,
         @InjectRepository(ChallengeRejection) private readonly challengeRejectionRepository: Repository<ChallengeRejection>,
@@ -164,7 +164,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         let timeInSeason = (Date.now() - (season.startOffsetDate.getTime())) / 1000;
         if (timeInSeason < 0) {
             // we are in the season startDate - startOffsetDate gap, so no SeasonPlan should be activated.
-            // TODO define meaningful pre-season content
+            // TODO define meaningful pre-season text
             return undefined
         }
         let seasonPlans = await season.seasonPlan;
@@ -216,33 +216,11 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         return challengeCompletion;
     }
 
-    public async rejectChallenge(user: User, seasonPlanChallengeId: number): Promise<ChallengeRejection> {
-        let seasonPlanChallenge: SeasonPlanChallenge = await this.getSeasonPlanChallengeFromCurrentSeasonPlanById(seasonPlanChallengeId);
-        const currentSeasonPlan = await this.getCurrentSeasonPlan();
-        if (!seasonPlanChallenge) return Promise.reject("SeasonPlanChallenge not found in current SeasonPlan!");
-        const userRejections = await this.challengeRejectionRepository.find({where: {owner: user, seasonPlanChallenge: seasonPlanChallenge}});
-        if(userRejections && userRejections.length > 0) {
-            return Promise.reject("SeasonPlanChallenge already rejected!");
-        }
-        // TODO check jokers
-        let challengeRejection: ChallengeRejection = new ChallengeRejection();
-        challengeRejection.owner = Promise.resolve(user);
-        challengeRejection.seasonPlanChallenge = Promise.resolve(seasonPlanChallenge);
-
-        await this.addReplacementChallenge(user, currentSeasonPlan, challengeRejection)
-            .catch(err => {
-                return Promise.reject(err)
-            });
-
-        return this.challengeRejectionRepository.save(challengeRejection)
-    }
-
     public async getCurrentChallengesForUser(user: User): Promise<IUserChallenge[]> {
         const currentSeasonPlan = await this.getCurrentSeasonPlan();
         let challenges: IUserChallenge[] = await currentSeasonPlan.challenges;
         challenges = (await Promise.all(
-            challenges.map(async c => {return {challenge: c, isSpare: (await c.challenge).isSpare}})))
-            .filter(v => !v.isSpare)
+            challenges.map(async c => {return {challenge: c}})))
             .map(v => v.challenge);
         const replacements: IUserChallenge[] = await this.challengeReplacementRepository.find({
             where: {
@@ -252,7 +230,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         });
         challenges = challenges.concat(replacements);
 
-        console.log(await challenges.map(challenge => challenge.challenge.then(async c => await c.themenWoche)));
+        console.log(await challenges.map(challenge => challenge.challenge.then(async c => await c.thema)));
 
         const rejections = await this.challengeRejectionRepository.find({
             where: {
@@ -285,41 +263,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     }
 
-    private async addReplacementChallenge(user: User, currentSeasonPlan: SeasonPlan, newRejection?: ChallengeRejection): Promise<ChallengeReplacement> {
-
-        let challengeReplacement = new ChallengeReplacement();
-        challengeReplacement.owner = Promise.resolve(user);
-        challengeReplacement.plan = Promise.resolve(currentSeasonPlan);
-
-        const rejections = await user.challengeRejections;
-        if(newRejection) rejections.push(newRejection);
-        const rejectedChallenges = await Promise.all(rejections.map(async rejection => {
-            return await rejection.seasonPlanChallenge;
-        }));
-
-        // select replacement challenge by searching the oberthema and then te kategorie. Error out if no more challenges are available;
-        let replacementChallenge: Challenge;
-        const themenwoche = await currentSeasonPlan.themenwoche;
-        const oberthemaChallenges = await themenwoche.oberthema.then(async value => await value.challenges);
-        const availableOberthemaChallenges = oberthemaChallenges.filter(challenge => this.filterRejections(challenge, rejections, currentSeasonPlan));
-        if(availableOberthemaChallenges && availableOberthemaChallenges.length > 0) {
-            replacementChallenge = availableOberthemaChallenges[0];
-        } else {
-            const kategorieChallenges = await themenwoche.kategorie.then(async value => await value.challenges);
-            const availableKategorieChallenges = kategorieChallenges.filter(challenge => this.filterRejections(challenge, rejections, currentSeasonPlan));
-            if(availableKategorieChallenges && availableKategorieChallenges.length > 0) {
-                replacementChallenge = availableKategorieChallenges[0];
-            } else {
-                return Promise.reject("No additional challenges in oberthema or katergorie!");
-            }
-        }
-
-        challengeReplacement.challenge = Promise.resolve(replacementChallenge);
-
-        return this.challengeReplacementRepository.save(challengeReplacement);
-    }
-
-    private async filterRejections(challenge: Challenge, rejections: ChallengeRejection[], currentSeasonPlan: SeasonPlan): Promise<boolean> {
+    private async filterRejections(challenge: Badge, rejections: ChallengeRejection[], currentSeasonPlan: SeasonPlan): Promise<boolean> {
         const r = rejections.filter( async rejection => {
             let seasonPlanChallenge = await rejection.seasonPlanChallenge.then(async spc => await spc.challenge);
             return challenge.id === seasonPlanChallenge.id;

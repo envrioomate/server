@@ -39,8 +39,4 @@ export class GameStateResolver {
         return this.mgmr.unCompleteChallenge(user, challengeCompletionId)
     }
 
-    @Mutation(returns => ChallengeRejection, {nullable: true})
-        async rejectChallenge(@Ctx() {user}, @Arg("challengeId", type => Int) challengeId: number): Promise<ChallengeRejection> {
-        return this.mgmr.rejectChallenge(user, challengeId)
-    }
 }

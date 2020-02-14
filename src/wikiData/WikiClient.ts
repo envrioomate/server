@@ -5,19 +5,20 @@
 
 
 import axios from "axios";
-import {Challenge} from "../entity/wiki-content/Challenge";
+import {Badge} from "../entity/wiki-content/Badge";
 import {Service} from "typedi";
 import {InjectRepository} from "typeorm-typedi-extensions";
 import {Repository} from "typeorm";
 import * as Nearley from "nearley";
 import * as grammar from "./topicweekGrammar";
 import {Props, WikiProps} from "../entity/wiki-content/Props";
-import {Themenwoche} from "../entity/wiki-content/Themenwoche";
+import {Thema} from "../entity/wiki-content/Thema";
 import {Kategorie} from "../entity/wiki-content/Kategorie";
 import {Oberthema} from "../entity/wiki-content/Oberthema";
 import {WikiImage} from "../entity/wiki-content/WikiImage";
 import {WikiWarning, WikiWarnings} from "../entity/wiki-content/WikiWarning";
 import {Quelle} from "../entity/wiki-content/Quelle";
+import {Achievement} from "../entity/wiki-content/Achievement";
 
 let config = require("../../config.json");
 
@@ -33,7 +34,7 @@ export class WikiClient {
         action: "query",
         format: "json",
         list: "categorymembers",
-        cmtitle: "Kategorie%3AThemenwoche"
+        cmtitle: "Kategorie%3AThema"
     };
 
     private parser = new Nearley.Parser(Nearley.Grammar.fromCompiled(grammar));
@@ -46,12 +47,13 @@ export class WikiClient {
     });
 
     constructor(
-        @InjectRepository(Challenge) private readonly challengeRepository: Repository<Challenge>,
+        @InjectRepository(Badge) private readonly badgeRepository: Repository<Badge>,
         @InjectRepository(Kategorie) private readonly kategorieRepository: Repository<Kategorie>,
         @InjectRepository(Oberthema) private readonly oberthemaRepository: Repository<Oberthema>,
         @InjectRepository(Props) private readonly propsRepository: Repository<Props>,
         @InjectRepository(Quelle) private readonly quelleRepository: Repository<Quelle>,
-        @InjectRepository(Themenwoche) private readonly themenwocheRepository: Repository<Themenwoche>,
+        @InjectRepository(Thema) private readonly themaRepository: Repository<Thema>,
+        @InjectRepository(Achievement) private readonly achievementRepository: Repository<Achievement>,
         @InjectRepository(WikiImage) private readonly wikiImageRepository: Repository<WikiImage>,
         @InjectRepository(WikiWarning) private readonly wikiWaringRepsitory: Repository<WikiWarning>,
     ) {
@@ -64,7 +66,7 @@ export class WikiClient {
             format: "json",
             prop: "revisions|pageprops",
             pageids: encodeURIComponent(pageIds.join('|')),
-            rvprop: "ids|timestamp|flags|comment|user|content"
+            rvprop: "ids|timestamp|flags|comment|content|user|text"
         }
     }
 
@@ -76,7 +78,7 @@ export class WikiClient {
             indexpageids: 1,
             titles: canonicalFileName,
             iiprop: "timestamp|user|url|mime",
-            rvprop: "content"
+            rvprop: "text"
         }
     }
 
@@ -108,8 +110,10 @@ export class WikiClient {
     }
 
     public async fetchAllPages(): Promise<WikiPageData[]> {
+        console.log(this.paramObjectToUrl(WikiClient.requestAllTopicsParamObject));
         const res = await this.connection.get(this.paramObjectToUrl(WikiClient.requestAllTopicsParamObject));
         const pages = res.data.query.categorymembers.map((val) => (val.title.slice(0, 8) !== "Vorlage:") ? val.pageid : null).filter((val) => val !== null);
+        console.log(this.paramObjectToUrl(WikiClient.requestTemplatesForPages(pages)));
         const wikiData = await this.connection.get(this.paramObjectToUrl(WikiClient.requestTemplatesForPages(pages)));
         return pages.map((pageId) => {
             return this.extractPage(pageId, wikiData);
@@ -145,77 +149,16 @@ export class WikiClient {
                 throw new Error(warnings.toString())
             }
 
-            // extract structured data
-            let topicTemplate = pageData.templateData.filter((template) => template.templateName === "Themenwoche");
-            let challengeTemplates = pageData.templateData.filter((template) => template.templateName === "Challenge");
+            let themas = pageData.templateData.map(value => this.extractThema(value)).filter(Boolean);
+            let badges = pageData.templateData.map(value => this.extractBadge(value)).filter(Boolean);
+            let achievements = pageData.templateData.map(value => this.extractAchievement(value)).filter(Boolean);
 
-            if (!topicTemplate || topicTemplate.length === 0) {
-                warnings.push(WikiWarnings.NoTopic)
-            } else {
-                topicTemplate = topicTemplate[0];
-                let themenwoche: Themenwoche = Themenwoche.fromTemplate(topicTemplate.templateValues);
-                let kategorie: Kategorie = Kategorie.fromWeekTemplate(topicTemplate.templateValues);
-                let oberthema: Oberthema = Oberthema.fromWeekTemplate(topicTemplate.templateValues);
 
-                kategorie = await this.kategorieRepository.findOne({where: {name: kategorie.name}}) || kategorie;
-                kategorie.props = Promise.resolve(props);
-                let kategorieOberthemen = await kategorie.oberthemen;
-                kategorieOberthemen.push(oberthema);
-                kategorie.oberthemen = Promise.resolve(kategorieOberthemen);
-                //kategorie = await this.kategorieRepository.save(kategorie);
 
-                oberthema.props = Promise.resolve(props);
-                oberthema.kategorie = Promise.resolve(kategorie);
-                oberthema.themenWochen = Promise.resolve([... await oberthema.themenWochen, themenwoche]);
-               // oberthema = await this.oberthemaRepository.save(oberthema);
+            let badgeResult = await this.badgeRepository.save(badges);
+            let themaResult = await this.themaRepository.save(themas);
+            let achievementResult = await this.achievementRepository.save(achievements);
 
-                themenwoche.props = Promise.resolve(props);
-                themenwoche.oberthema = Promise.resolve(oberthema);
-                themenwoche.kategorie = Promise.resolve(kategorie);
-
-                themenwoche.headerImage = await this.fetchHeaderImage(topicTemplate.templateValues.HeaderImage, themenwoche)
-                    .catch(err => {
-                        warnings.push(WikiWarnings.NoHeaderImage);
-                        return null;
-                });
-
-                if (!challengeTemplates || challengeTemplates.length === 0) {
-                    warnings.push(WikiWarnings.NoChallenges);
-                } else {
-                    let challenges: Challenge[] = challengeTemplates.map((challengeTemplate) => Challenge.fromTemplate(challengeTemplate.templateValues));
-                    if (challenges.filter(c => !c.isSpare).length < 4) warnings.push(WikiWarnings.NotEnoughDefaultChallenges);
-                    if (challenges.filter(c => c.isSpare).length <= 0) warnings.push(WikiWarnings.NoSpareChallenges);
-
-                    challenges = await Promise.all(challenges.map(async challenge => {
-
-                        let dbChallenge = await this.challengeRepository.findOne({where: {title: challenge.title, props: {pageid: props.pageid}}});
-
-                        if (dbChallenge) {
-                            challenge.id = dbChallenge.id
-                        }
-
-                        challenge.props = Promise.resolve(props);
-                        challenge.themenWoche = Promise.resolve(themenwoche);
-                        challenge.kategorie = Promise.resolve(kategorie);
-                        challenge.oberthema = Promise.resolve(oberthema);
-                        challenge.headerImage = await this.fetchHeaderImage(challenge.headerImageUrl, challenge)
-                            .catch(err => {
-                                warnings.push(WikiWarnings.NoHeaderImage);
-                                return null;
-                            });
-
-                        //this.challengeRepository.save(challenge).catch(e => console.error(e));
-                        return challenge;
-                    }));
-
-                    themenwoche.challenges = Promise.resolve(challenges);
-                    oberthema.challenges = Promise.resolve(challenges);
-                    kategorie.challenges = Promise.resolve(challenges);
-                }
-                //oberthema = await this.oberthemaRepository.save(oberthema);
-                themenwoche = await this.themenwocheRepository.save(themenwoche);
-
-            }
         } catch (e) {
             console.error(e.message);
             warnings.push(WikiWarnings.TemplateParsingError);
@@ -230,7 +173,31 @@ export class WikiClient {
 
     }
 
-    private async fetchHeaderImage(wikiImageUrl: string, assignee: (Challenge | Themenwoche)): Promise<WikiImage>  {
+    private extractThema(template: any) {
+        if(template.templateName === "Thema") {
+            let thema = Thema.fromTemplate(template.templateValues);
+            thema.headerImage = this.fetchWikiImage(template.headerImage, thema);
+            return thema;
+        }
+    }
+
+    private extractBadge(template: any) {
+        if(template.templateName === "Badge") {
+            let badge = Badge.fromTemplate(template.templateValues);
+            badge.headerImage = this.fetchWikiImage(template.headerImage, badge);
+            badge.icon = this.fetchWikiImage(template.badgeIcon, badge);
+            return badge;
+        }
+    }
+
+    private extractAchievement(template: any) {
+        if(template.templateName === "Achievement") {
+            return Achievement.fromTemplate(template.templateValues)
+        }
+    }
+
+
+    private async fetchWikiImage(wikiImageUrl: string, assignee: (Badge | Thema)): Promise<WikiImage>  {
         if(wikiImageUrl){
             try {
                 let imageInfo = await this.connection.get(this.paramObjectToUrl(WikiClient.requestImagesForFile(wikiImageUrl)));

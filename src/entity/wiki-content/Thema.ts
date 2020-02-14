@@ -11,7 +11,7 @@ import {
 } from "typeorm";
 import {Quelle} from "./Quelle";
 import {Oberthema} from "./Oberthema";
-import {Challenge} from "./Challenge";
+import {Badge} from "./Badge";
 import {Props} from "./Props";
 import {WikiImage} from "./WikiImage";
 import {Kategorie} from "./Kategorie";
@@ -20,19 +20,23 @@ import {Field, ObjectType} from "type-graphql";
 
 @Entity()
 @ObjectType()
-export class Themenwoche{
+export class Thema{
 
     @Field(type => String)
     @PrimaryColumn({type: "varchar", length: 191})
+    name: string;
+
+    @Field(type => String)
+    @Column()
     title: string;
 
     @Field(type => String)
     @Column({type: "text"})
-    content: string;
+    text: string;
 
     @Field(type => WikiImage, {nullable: true})
     @ManyToOne(type => WikiImage, {eager: true})
-    headerImage: WikiImage;
+    headerImage: Promise<WikiImage>;
 
     @Field(type => Date)
     @CreateDateColumn()
@@ -42,36 +46,24 @@ export class Themenwoche{
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @Field(type => Oberthema, {nullable: true})
-    @ManyToOne(type => Oberthema, o => o.themenWochen, {cascade: true})
-    oberthema: Promise<Oberthema>;
-
-    @Field(type => Kategorie, {nullable: true})
-    @ManyToOne(type => Kategorie, k => k.themenWochen,{cascade: true})
-    kategorie: Promise<Kategorie>;
-
-    @Field(type => [Challenge], {nullable: true})
-    @OneToMany(type => Challenge, c => c.themenWoche,{cascade: true})
+    @Field(type => [Badge], {nullable: true})
+    @OneToMany(type => Badge, c => c.thema,{cascade: true})
     @JoinTable()
-    challenges: Promise<Challenge[]>;
+    badges: Promise<Badge[]>;
 
     @Field(type => Props)
     @ManyToOne(type => Props)
     props: Promise<Props>;
 
-    @Field(type => Quelle, {nullable: true})
-    @ManyToMany(type => Quelle)
-    @JoinTable()
-    quellen: Promise<Quelle[]>;
-
     @Field(type => [SeasonPlan], {nullable: true})
     @OneToMany(type => SeasonPlan, s => s.themenwoche)
     usages: Promise<SeasonPlan[]>;
 
-    static fromTemplate(templateValues: any) {
-        let themenWoche = new Themenwoche();
-        themenWoche.title = templateValues.Titel;
-        themenWoche.content = templateValues.Beschreibung;
-        return themenWoche;
+    public static fromTemplate(templateValues: any): Thema {
+        let thema = new Thema();
+        thema.name = templateValues.name;
+        thema.title = templateValues.title;
+        thema.text = templateValues.text;
+        return thema;
     }
 }

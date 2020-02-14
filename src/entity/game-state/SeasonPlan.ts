@@ -9,7 +9,7 @@ import {
     UpdateDateColumn
 } from "typeorm";
 import {Season} from "./Season";
-import {Themenwoche} from "../wiki-content/Themenwoche";
+import {Thema} from "../wiki-content/Thema";
 import {Field, Int, ObjectType} from "type-graphql";
 import {SeasonPlanChallenge} from "./SeasonPlanChallenge";
 
@@ -50,9 +50,9 @@ export class SeasonPlan {
         }
     }
 
-    @Field(type => Themenwoche)
-    @ManyToOne(type => Themenwoche, t => t.usages)
-    themenwoche: Promise<Themenwoche>;
+    @Field(type => Thema)
+    @ManyToOne(type => Thema, t => t.usages)
+    themenwoche: Promise<Thema>;
 
     @Field(type => [SeasonPlanChallenge])
     @OneToMany(type => SeasonPlanChallenge, s => s.plan, {cascade: ["remove"]})

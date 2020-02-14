@@ -2,7 +2,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/api/auth/complete-challenge",
-    "title": "Complete Challenge",
+    "title": "Complete Badge",
     "name": "Complete_Challenge",
     "group": "ClientAPI",
     "header": {
@@ -63,7 +63,7 @@ define({ "api": [
   },
   {
     "type": "get",
-    "url": "/api/auth/completed-challenges",
+    "url": "/api/auth/completed-badges",
     "title": "Completed Challenges",
     "name": "Completed_Challenges",
     "group": "ClientAPI",
@@ -88,7 +88,7 @@ define({ "api": [
             "type": "Object[]",
             "optional": false,
             "field": "The",
-            "description": "<p>completed challenges</p>"
+            "description": "<p>completed badges</p>"
           }
         ]
       }
