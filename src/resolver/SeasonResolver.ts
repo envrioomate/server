@@ -1,9 +1,9 @@
 import {Arg, Authorized, Ctx, Int, Mutation, Query, Resolver} from "type-graphql";
 import {Oberthema} from "../entity/wiki-content/Oberthema";
-import {Challenge} from "../entity/wiki-content/Challenge";
+import {Badge} from "../entity/wiki-content/Badge";
 import {Quelle} from "../entity/wiki-content/Quelle";
 import {WikiImage} from "../entity/wiki-content/WikiImage";
-import {Themenwoche} from "../entity/wiki-content/Themenwoche";
+import {Thema} from "../entity/wiki-content/Thema";
 import {WikiWarning} from "../entity/wiki-content/WikiWarning";
 import {Kategorie} from "../entity/wiki-content/Kategorie";
 import {InjectRepository} from "typeorm-typedi-extensions";
@@ -27,12 +27,12 @@ export class SeasonResolver {
     private gameStateManager: GameProgressionManager = Container.get(GameProgressionManager);
 
     constructor(
-        @InjectRepository(Challenge) private readonly challengeRepository: Repository<Challenge>,
+        @InjectRepository(Badge) private readonly challengeRepository: Repository<Badge>,
         @InjectRepository(Kategorie) private readonly kategorieRepository: Repository<Kategorie>,
         @InjectRepository(Oberthema) private readonly oberthemaRepository: Repository<Oberthema>,
         @InjectRepository(Props) private readonly propsRepository: Repository<Props>,
         @InjectRepository(Quelle) private readonly quelleRepository: Repository<Quelle>,
-        @InjectRepository(Themenwoche) private readonly themenwocheRepository: Repository<Themenwoche>,
+        @InjectRepository(Thema) private readonly themenwocheRepository: Repository<Thema>,
         @InjectRepository(WikiImage) private readonly wikiImageRepository: Repository<WikiImage>,
         @InjectRepository(WikiWarning) private readonly wikiWaringRepsitory: Repository<WikiWarning>,
         @InjectRepository(Season) private readonly seasonRepsitory: Repository<Season>,
@@ -94,13 +94,13 @@ export class SeasonResolver {
     }
 
 
-    @Query(returns => [Themenwoche], {nullable: true})
-    async themenwoches(@Ctx() {user}): Promise<Themenwoche[]> {
+    @Query(returns => [Thema], {nullable: true})
+    async themenwoches(@Ctx() {user}): Promise<Thema[]> {
         return this.themenwocheRepository.find();
     }
 
-    @Query(returns => Themenwoche, {nullable: true})
-    async themenwoche(@Ctx() {user}, @Arg("themenwocheId", type => String) themenwocheId: string): Promise<Themenwoche> {
+    @Query(returns => Thema, {nullable: true})
+    async themenwoche(@Ctx() {user}, @Arg("themenwocheId", type => String) themenwocheId: string): Promise<Thema> {
         return this.themenwocheRepository.findOne({where: {title: themenwocheId}});
     }
 
@@ -142,7 +142,7 @@ export class SeasonResolver {
         seasonPlan.position = seasonPlanInput.position ? seasonPlanInput.position : seasonPlan.position;
         seasonPlan = await this.seasonPlanRepsitory.save(seasonPlan);
 
-        let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await themenwoche.challenges).map(async (challenge): Promise<SeasonPlanChallenge> => {
+        let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await themenwoche.badges).map(async (challenge): Promise<SeasonPlanChallenge> => {
             let seasonPlanChallenge = new SeasonPlanChallenge();
             seasonPlanChallenge.challenge = Promise.resolve(challenge);
             seasonPlanChallenge.plan = Promise.resolve(seasonPlan);

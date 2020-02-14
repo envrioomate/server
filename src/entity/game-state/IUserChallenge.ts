@@ -1,5 +1,5 @@
 import {Field, Int, InterfaceType} from "type-graphql";
-import {Challenge} from "../wiki-content/Challenge";
+import {Badge} from "../wiki-content/Badge";
 import {SeasonPlan} from "./SeasonPlan";
 import {ChallengeCompletion} from "./ChallengeCompletion";
 import {Context} from "../../resolver/types/Context";
@@ -7,8 +7,8 @@ import {Context} from "../../resolver/types/Context";
 @InterfaceType()
 export abstract class IUserChallenge {
 
-    @Field(type => Challenge)
-    challenge: Promise<Challenge>;
+    @Field(type => Badge)
+    challenge: Promise<Badge>;
 
     @Field(type => Int)
     id: number;

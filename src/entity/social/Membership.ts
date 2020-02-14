@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt-nodejs';
 import {Team} from "./Team";
 import {User} from "../user/User";
 import {dateFormat} from "dateformat";
-import {Challenge} from "../wiki-content/Challenge";
+import {Badge} from "../wiki-content/Badge";
 import {Field, Int, ObjectType} from "type-graphql";
 
 @ObjectType()

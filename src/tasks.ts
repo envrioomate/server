@@ -1,4 +1,4 @@
-import {Challenge} from "./entity/wiki-content/Challenge";
+import {Badge} from "./entity/wiki-content/Badge";
 import {getRepository, Repository} from "typeorm";
 import * as schedule from 'node-schedule';
 import {Subscription} from "./entity/user/Subscription";

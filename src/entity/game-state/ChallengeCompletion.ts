@@ -48,7 +48,7 @@ export class ChallengeCompletion {
 
     @Field(type => Number, {nullable: true})
     @Column()
-    challengeCompletionQuantity: number; //null if qualitative Challenge
+    challengeCompletionQuantity: number; //null if qualitative Badge
 
 
 }

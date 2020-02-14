@@ -3,7 +3,7 @@ import {Ctx, Field, Int, ObjectType} from "type-graphql";
 import {User} from "../user/User";
 import {IUserChallenge} from "./IUserChallenge";
 import {SeasonPlan} from "./SeasonPlan";
-import {Challenge} from "../wiki-content/Challenge";
+import {Badge} from "../wiki-content/Badge";
 import {ChallengeCompletion} from "./ChallengeCompletion";
 import {Context} from "../../resolver/types/Context";
 
@@ -27,9 +27,9 @@ export class ChallengeReplacement extends IUserChallenge {
     @ManyToOne(type => User, u => u.challengeReplacements)
     owner: Promise<User>;
 
-    @Field(type => Challenge)
-    @ManyToOne(type => Challenge)
-    challenge: Promise<Challenge>;
+    @Field(type => Badge)
+    @ManyToOne(type => Badge)
+    challenge: Promise<Badge>;
 
     @Field(type => SeasonPlan)
     @ManyToOne(type => SeasonPlan)
