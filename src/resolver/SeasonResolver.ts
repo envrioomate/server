@@ -128,21 +128,21 @@ export class SeasonResolver {
         if(!seasonPlan.season) {
             return Promise.reject("SeasonPlans must belong to a Season! If you're creating a new SeasonPlan, please specify a seasonID. Otherwise contact your DevOps team.")
         }
-        let themenwoche = seasonPlanInput.themenwocheId ? await this.themenwocheRepository.findOne({title: seasonPlanInput.themenwocheId}) : await seasonPlan.themenwoche;
-        let usages = await themenwoche.usages;
+        let thema = seasonPlanInput.themaName ? await this.themenwocheRepository.findOne({title: seasonPlanInput.themaName}) : await seasonPlan.themenwoche;
+        let usages = await thema.usages;
         if (usages)
             usages.push(seasonPlan);
         else
             usages = [seasonPlan];
-        themenwoche.usages = Promise.resolve(usages);
-        themenwoche = await this.themenwocheRepository.save(themenwoche);
-        seasonPlan.themenwoche = Promise.resolve(themenwoche);
+        thema.usages = Promise.resolve(usages);
+        thema = await this.themenwocheRepository.save(thema);
+        seasonPlan.themenwoche = Promise.resolve(thema);
 
         seasonPlan.duration = seasonPlanInput.duration ? seasonPlanInput.duration : seasonPlan.duration;
         seasonPlan.position = seasonPlanInput.position ? seasonPlanInput.position : seasonPlan.position;
         seasonPlan = await this.seasonPlanRepsitory.save(seasonPlan);
 
-        let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await themenwoche.badges).map(async (challenge): Promise<SeasonPlanChallenge> => {
+        let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await thema.badges).map(async (challenge): Promise<SeasonPlanChallenge> => {
             let seasonPlanChallenge = new SeasonPlanChallenge();
             seasonPlanChallenge.challenge = Promise.resolve(challenge);
             seasonPlanChallenge.plan = Promise.resolve(seasonPlan);

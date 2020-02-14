@@ -9,7 +9,7 @@ export class SeasonPlanInput {
     seasonId: number;
 
     @Field(type => String,{nullable: true})
-    themenwocheId: string;
+    themaName: string;
 
     @Field(type => Int, {nullable: true})
     position: number;
