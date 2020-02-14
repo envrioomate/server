@@ -100,7 +100,9 @@ export class WikiClient {
     }
 
     public async fetchPage(pageId: number): Promise<WikiPageData> {
-        const wikiData = await this.connection.get(this.paramObjectToUrl(WikiClient.requestTemplatesForPages([pageId])));
+        let targetURL = this.paramObjectToUrl(WikiClient.requestTemplatesForPages([pageId]));
+        console.log(targetURL);
+        const wikiData = await this.connection.get(targetURL);
         return this.extractPage(pageId, wikiData);
 
     }
