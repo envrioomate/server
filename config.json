@@ -9,7 +9,7 @@
   "key": "../../server.key",
   "cert": "../../server.crt",
   "domain": "https://localhost",
-  "wikiUrl": "https://klimafuchs.org/wiki",
+  "wikiUrl": "https://wiki.dastreibdnewerk.de",
   "wikiKey": "secret",
   "redisDb": "0"
 }
