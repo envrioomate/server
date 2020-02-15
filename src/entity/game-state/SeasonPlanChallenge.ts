@@ -19,10 +19,6 @@ export class SeasonPlanChallenge extends IUserChallenge {
     @OneToMany(type => ChallengeCompletion, c => c.seasonPlanChallenge)
     completions: Promise<ChallengeCompletion[]>;
 
-    @Field(type => ChallengeRejection)
-    @OneToMany(type => ChallengeRejection, c => c.seasonPlanChallenge)
-    rejections: Promise<ChallengeRejection[]>;
-
     @Field(type => SeasonPlan)
     @ManyToOne(type => SeasonPlan, { onDelete: 'SET NULL' })
     plan: Promise<SeasonPlan>;

@@ -218,62 +218,17 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     public async getCurrentChallengesForUser(user: User): Promise<IUserChallenge[]> {
         const currentSeasonPlan = await this.getCurrentSeasonPlan();
+        console.log(await currentSeasonPlan.challenges);
         let challenges: IUserChallenge[] = await currentSeasonPlan.challenges;
         challenges = (await Promise.all(
             challenges.map(async c => {return {challenge: c}})))
             .map(v => v.challenge);
-        const replacements: IUserChallenge[] = await this.challengeReplacementRepository.find({
-            where: {
-                owner: user,
-                seasonPlan: currentSeasonPlan
-            }
-        });
-        challenges = challenges.concat(replacements);
 
         console.log(await challenges.map(challenge => challenge.challenge.then(async c => await c.thema)));
 
-        const rejections = await this.challengeRejectionRepository.find({
-            where: {
-                owner: user,
-                seasonPlanChallenge: {id: In(challenges.map(ch => ch.id))}
-            }
-        });
+         return challenges;
 
-        if(rejections && rejections.length > 0){
-            const rejectionPlanIds = await Promise.all(rejections.map(async rejection => {
-                return {rejection, id: await rejection.seasonPlanChallenge.then(_ => _.id)}
-            }));
 
-            console.log("rejectionPlanIds: " + rejectionPlanIds);
-
-            const nonRejectedChallenges = challenges.filter(challenge => {
-                console.log("challenge: " + challenge);
-
-                return rejectionPlanIds.some(rejectionPlanId => {
-                    return rejectionPlanId.id !== challenge.id
-                });
-            });
-
-            console.log("nonRejectedChallenges: " + nonRejectedChallenges);
-
-            return nonRejectedChallenges;
-        } else {
-            return challenges;
-        }
-
-    }
-
-    private async filterRejections(challenge: Badge, rejections: ChallengeRejection[], currentSeasonPlan: SeasonPlan): Promise<boolean> {
-        const r = rejections.filter( async rejection => {
-            let seasonPlanChallenge = await rejection.seasonPlanChallenge.then(async spc => await spc.challenge);
-            return challenge.name === seasonPlanChallenge.name;
-        });
-        const currentSeasonPlanChallenges = await currentSeasonPlan.challenges;
-        const s = currentSeasonPlanChallenges.filter(async spc => {
-            let seasonPlanChallenge = await spc.challenge;
-            return challenge.name === seasonPlanChallenge.name;
-        });
-        return !(r.length + s.length);
     }
 
     private async getSeasonPlanChallengeFromCurrentSeasonPlanById(seasonPlanChallengeId: number): Promise<SeasonPlanChallenge> {

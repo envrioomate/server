@@ -23,9 +23,4 @@ export class ChallengeRejection {
     @Field(type => User)
     @ManyToOne(type => User, u => u.challengeRejections)
     owner: Promise<User>;
-
-    @Field(type => SeasonPlanChallenge)
-    @ManyToOne(type => SeasonPlanChallenge, s => s.rejections)
-    seasonPlanChallenge: Promise<SeasonPlanChallenge>;
-
 }

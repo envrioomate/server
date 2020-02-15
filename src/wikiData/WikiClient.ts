@@ -149,14 +149,15 @@ export class WikiClient {
                 throw new Error(warnings.toString())
             }
 
-            let themas = pageData.templateData.map(value => this.extractThema(value)).filter(Boolean);
+            let thema:Thema = pageData.templateData.map(value => this.extractThema(value)).filter(Boolean)[0];
             let badges = pageData.templateData.map(value => this.extractBadge(value)).filter(Boolean);
             let achievements = pageData.templateData.map(value => this.extractAchievement(value)).filter(Boolean);
 
 
+            await Promise.all(badges.map(b => b.achievements = achievements.filter(a => a.badgeName === b.name)));
+            thema.badges = await this.badgeRepository.save(badges);
+            let themaResult = await this.themaRepository.save(thema);
 
-            let badgeResult = await this.badgeRepository.save(badges);
-            let themaResult = await this.themaRepository.save(themas);
             let achievementResult = await this.achievementRepository.save(achievements);
 
         } catch (e) {

@@ -46,12 +46,15 @@ export class Achievement{
     @ManyToOne(type => Props)
     props: Promise<Props>;
 
+    badgeName?: string;
+
     static fromTemplate(templateValues: any) {
         let achievement = new Achievement();
         achievement.name = templateValues.name;
         achievement.title = templateValues.title;
         achievement.text = templateValues.text;
         achievement.score = templateValues.score;
+        achievement.badgeName = templateValues.badge;
         return achievement;
     }
 }

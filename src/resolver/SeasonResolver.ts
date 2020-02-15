@@ -128,7 +128,7 @@ export class SeasonResolver {
         if(!seasonPlan.season) {
             return Promise.reject("SeasonPlans must belong to a Season! If you're creating a new SeasonPlan, please specify a seasonID. Otherwise contact your DevOps team.")
         }
-        let thema = seasonPlanInput.themaName ? await this.themenwocheRepository.findOne({title: seasonPlanInput.themaName}) : await seasonPlan.themenwoche;
+        let thema = seasonPlanInput.themaName ? await this.themenwocheRepository.findOne({title: seasonPlanInput.themaName}) : await seasonPlan.thema;
         let usages = await thema.usages;
         if (usages)
             usages.push(seasonPlan);
@@ -136,7 +136,7 @@ export class SeasonResolver {
             usages = [seasonPlan];
         thema.usages = Promise.resolve(usages);
         thema = await this.themenwocheRepository.save(thema);
-        seasonPlan.themenwoche = Promise.resolve(thema);
+        seasonPlan.thema = Promise.resolve(thema);
 
         seasonPlan.duration = seasonPlanInput.duration ? seasonPlanInput.duration : seasonPlan.duration;
         seasonPlan.position = seasonPlanInput.position ? seasonPlanInput.position : seasonPlan.position;
@@ -167,27 +167,5 @@ export class SeasonResolver {
     async getPageProps(@Ctx() {user}, @Arg("pageId", type => Int) pageId: number): Promise<Props> {
         return this.propsRepository.findOne(pageId);
     }
-
-    @Query(returns => [Kategorie], {nullable: true})
-    async kategories(@Ctx() {user}): Promise<Kategorie[]> {
-        const kategories = await this.kategorieRepository.find();
-        return kategories;
-    }
-
-    @Query(returns => Kategorie, {nullable: true})
-    async kategorie(@Ctx() {user}, @Arg("kategorieId", type => String) kategorieId: string): Promise<Kategorie> {
-        return this.kategorieRepository.findOne(kategorieId)
-    }
-
-    @Query(returns => [Oberthema], {nullable: true})
-    async oberthemas(@Ctx() {user}): Promise<Oberthema[]> {
-        return this.oberthemaRepository.find();
-    }
-
-    @Query(returns => Oberthema, {nullable: true})
-    async oberthema(@Ctx() {user}, @Arg("oberthemaId", type => String) oberthemaId: string): Promise<Oberthema> {
-        return this.oberthemaRepository.findOne(oberthemaId)
-    }
-
 
 }

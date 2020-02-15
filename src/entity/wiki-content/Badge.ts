@@ -2,7 +2,7 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    ManyToOne,
+    ManyToOne, OneToMany,
     PrimaryColumn,
     PrimaryGeneratedColumn,
     UpdateDateColumn
@@ -13,6 +13,7 @@ import {Kategorie} from "./Kategorie";
 import {Oberthema} from "./Oberthema";
 import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {WikiImage} from "./WikiImage";
+import {Achievement} from "./Achievement";
 
 export enum BadgeGoalType {
     QUALITATIVE = 0,
@@ -124,6 +125,10 @@ export class Badge {
     @Field(type => BadgeGoals, {nullable: true})
     @Column(type => BadgeGoals)
     badgeGoals: BadgeGoals;
+
+    @Field(type => [Achievement], {nullable: true})
+    @OneToMany(type => Achievement, a => a.badge, {cascade: true})
+    achievements: Promise<Achievement[]>;
 
     static fromTemplate(challengeTemplate): Badge {
         let badge = new Badge();

@@ -52,7 +52,7 @@ export class SeasonPlan {
 
     @Field(type => Thema)
     @ManyToOne(type => Thema, t => t.usages)
-    themenwoche: Promise<Thema>;
+    thema: Promise<Thema>;
 
     @Field(type => [SeasonPlanChallenge])
     @OneToMany(type => SeasonPlanChallenge, s => s.plan, {cascade: ["remove"]})

@@ -56,7 +56,7 @@ export class Thema{
     props: Promise<Props>;
 
     @Field(type => [SeasonPlan], {nullable: true})
-    @OneToMany(type => SeasonPlan, s => s.themenwoche)
+    @OneToMany(type => SeasonPlan, s => s.thema)
     usages: Promise<SeasonPlan[]>;
 
     public static fromTemplate(templateValues: any): Thema {
