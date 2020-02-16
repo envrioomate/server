@@ -48,7 +48,6 @@ export class Thema{
 
     @Field(type => [Badge], {nullable: true})
     @OneToMany(type => Badge, c => c.thema,{cascade: true})
-    @JoinTable()
     badges: Promise<Badge[]>;
 
     @Field(type => Props)
