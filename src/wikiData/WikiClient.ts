@@ -149,16 +149,19 @@ export class WikiClient {
                 throw new Error(warnings.toString())
             }
 
-            let thema:Thema = pageData.templateData.map(value => this.extractThema(value)).filter(Boolean)[0];
-            let badges = pageData.templateData.map(value => this.extractBadge(value)).filter(Boolean);
+            let themaPromise = pageData.templateData.filter(t => t.templateName === "Thema").map(value => this.extractThema(value)).filter(Boolean)[0];
+            let thema = await themaPromise.catch(err=> {console.log(err); return null});
+            let badgePromises = (pageData.templateData.filter(t => t.templateName === "Badge").map(async value => await this.extractBadge(value)));
+            let badges = await Promise.all(badgePromises).catch(err=> {console.log(err); return null});
             let achievements = pageData.templateData.map(value => this.extractAchievement(value)).filter(Boolean);
 
 
             await Promise.all(badges.map(b => b.achievements = achievements.filter(a => a.badgeName === b.name)));
-            thema.badges = await this.badgeRepository.save(badges);
+            thema.badges = this.badgeRepository.save(badges);
+
+
             let themaResult = await this.themaRepository.save(thema);
 
-            let achievementResult = await this.achievementRepository.save(achievements);
 
         } catch (e) {
             console.error(e.message);
@@ -174,19 +177,21 @@ export class WikiClient {
 
     }
 
-    private extractThema(template: any) {
+    private async extractThema(template: any): Promise<Thema> {
         if(template.templateName === "Thema") {
-            let thema = Thema.fromTemplate(template.templateValues);
-            thema.headerImage = this.fetchWikiImage(template.headerImage, thema);
+            let {templateValues} = template;
+            let thema = Thema.fromTemplate(templateValues);
+            thema.headerImage = await this.fetchWikiImage(templateValues.headerImage, thema).catch(err=> {console.log(err); return null});;
             return thema;
         }
     }
 
-    private extractBadge(template: any) {
+    private async extractBadge(template: any): Promise<Badge> {
         if(template.templateName === "Badge") {
-            let badge = Badge.fromTemplate(template.templateValues);
-            badge.headerImage = this.fetchWikiImage(template.headerImage, badge);
-            badge.icon = this.fetchWikiImage(template.badgeIcon, badge);
+            let {templateValues} = template;
+            let badge = Badge.fromTemplate(templateValues);
+            badge.headerImage = await this.fetchWikiImage(templateValues.headerImage, badge).catch(err=> {console.log(err); return null});
+            badge.icon = await this.fetchWikiImage(templateValues.badgeIcon, badge).catch(err=> {console.log(err); return null});
             return badge;
         }
     }

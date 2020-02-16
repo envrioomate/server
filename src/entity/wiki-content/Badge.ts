@@ -116,11 +116,11 @@ export class Badge {
 
     @Field(type => WikiImage, {nullable: true})
     @ManyToOne(type => WikiImage)
-    headerImage: Promise<WikiImage>;
+    headerImage: WikiImage;
 
     @Field(type => WikiImage, {nullable: true})
     @ManyToOne(type => WikiImage)
-    icon: Promise<WikiImage>;
+    icon: WikiImage;
 
     @Field(type => BadgeGoals, {nullable: true})
     @Column(type => BadgeGoals)

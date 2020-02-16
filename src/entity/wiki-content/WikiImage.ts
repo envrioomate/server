@@ -30,9 +30,9 @@ export class WikiImage {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @Field(type => String)
-    @Column()
-    details: string;
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    details?: string;
 
     @Field(type => String)
     @PrimaryColumn({type: "varchar", length: 191})
