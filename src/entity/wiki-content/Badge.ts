@@ -72,6 +72,7 @@ export class BadgeGoals {
             case("QUALITATIVE"): return BadgeGoalType.QUALITATIVE;
             case("QUANTITATIVE_ASC"): return BadgeGoalType.QUANTITY_ASC;
             case("QUANTITATIVE_DSC"): return BadgeGoalType.QUANTITY_DSC;
+            default: return BadgeGoalType.QUALITATIVE;
         }
     }
 }

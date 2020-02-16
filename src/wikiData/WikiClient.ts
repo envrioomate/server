@@ -157,12 +157,9 @@ export class WikiClient {
 
 
             await Promise.all(badges.map(b => b.achievements = achievements.filter(a => a.badgeName === b.name)));
-            thema.badges = this.badgeRepository.save(badges);
+            thema.badges = badges;
 
-
-            let themaResult = await this.themaRepository.save(thema);
-
-
+            let themaResult = await this.themaRepository.save(thema); // save everything through cascading
         } catch (e) {
             console.error(e.message);
             warnings.push(WikiWarnings.TemplateParsingError);
