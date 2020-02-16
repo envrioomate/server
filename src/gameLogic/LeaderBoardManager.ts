@@ -5,6 +5,7 @@ import {Membership} from "../entity/social/Membership";
 import {InjectRepository} from "typeorm-typedi-extensions";
 import {Repository} from "typeorm";
 import {Team} from "../entity/social/Team";
+import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 
 @Service()
 export class LeaderBoardManager {
@@ -39,8 +40,6 @@ export class LeaderBoardManager {
                 })
             }
         );
-
-
     }
 
     @subscribe(Membership)

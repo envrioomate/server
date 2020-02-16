@@ -6,6 +6,8 @@ import {Container} from "typedi";
 import {ChallengeCompletion} from "../entity/game-state/ChallengeCompletion";
 import {ChallengeRejection} from "../entity/game-state/ChallengeRejection";
 import {IUserChallenge} from "../entity/game-state/IUserChallenge";
+import {AchievementSelection} from "../entity/game-state/AchievementSelection";
+import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 
 @Resolver()
 export class GameStateResolver {
@@ -27,6 +29,21 @@ export class GameStateResolver {
     @Query(returns => [IUserChallenge], {nullable: true})
     async currentChallenges(@Ctx() {user}): Promise<IUserChallenge[]> {
         return this.mgmr.getCurrentChallengesForUser(user);
+    }
+
+    @Query(returns => [AchievementSelection], {nullable: true})
+    async currentlySelectedAchievements(@Ctx() {user}): Promise<AchievementSelection[]> {
+        return this.mgmr.getCurrentlySelectedAchievementsForUser(user);
+    }
+
+    @Mutation(returns => AchievementSelection, {nullable: true})
+    async selectAchievement(@Ctx() {user}, @Arg("achievementName", type => String) achievementName: string): Promise<AchievementSelection>{
+        return this.mgmr.selectAchievement(user, achievementName);
+
+    }
+    @Mutation(returns => AchievementCompletion, {nullable: true})
+    async completeAchievement(@Ctx() {user}, @Arg("achievementSelectionId", type => Int) achievementSelectionId: number): Promise<AchievementSelection>{
+        return this.mgmr.completeAchievement(user, achievementSelectionId);
     }
 
     @Mutation(returns => ChallengeCompletion, {nullable: true})

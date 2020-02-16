@@ -20,6 +20,8 @@ import {ChallengeRejection} from "../game-state/ChallengeRejection";
 import {ChallengeReplacement} from "../game-state/ChallengeReplacement";
 import {Notification} from "./Notification";
 import {Subscription} from "./Subscription";
+import {AchievementSelection} from "../game-state/AchievementSelection";
+import {AchievementCompletion} from "../game-state/AchievementCompletion";
 
 export enum Role {
     User = 0,
@@ -108,6 +110,15 @@ export class User { //TODO split into profile data and user data
     @Field(type => [ChallengeReplacement], {nullable: true})
     @OneToMany(type => ChallengeReplacement, cr => cr.owner, {nullable: true})
     challengeReplacements?: Promise<ChallengeReplacement[]>;
+
+    @Field(type => [AchievementSelection], {nullable: true})
+    @OneToMany(type => AchievementSelection, as => as.owner, {nullable: true})
+    achievementSelections?: Promise<AchievementSelection[]> ;
+
+
+    @Field(type => [AchievementCompletion], {nullable: true})
+    @OneToMany(type => AchievementCompletion, as => as.owner, {nullable: true})
+    achievementCompletions?: Promise<AchievementCompletion[]> ;
 
     @BeforeInsert()
     public encrypt () {

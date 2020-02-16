@@ -2,13 +2,15 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    ManyToOne, PrimaryColumn,
+    ManyToOne, OneToMany, PrimaryColumn,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from "typeorm";
 import {Field, Int, ObjectType} from "type-graphql";
 import {Props} from "./Props";
 import {Badge} from "./Badge";
+import {AchievementSelection} from "../game-state/AchievementSelection";
+import {AchievementCompletion} from "../game-state/AchievementCompletion";
 
 @Entity()
 @ObjectType()
@@ -46,6 +48,18 @@ export class Achievement{
     @ManyToOne(type => Props)
     props: Promise<Props>;
 
+    @Field(type => Boolean)
+    @Column()
+    recurring: boolean;
+
+    @Field(type => [AchievementSelection], {nullable: true})
+    @OneToMany(type => AchievementSelection, as => as.achievement, {nullable: true})
+    achievementSelections?: Promise<AchievementSelection[]> ;
+
+    @Field(type => [AchievementCompletion], {nullable: true})
+    @OneToMany(type => AchievementCompletion, as => as.achievement, {nullable: true})
+    achievementCompletions?: Promise<AchievementCompletion[]> ;
+
     badgeName?: string;
 
     static fromTemplate(templateValues: any) {
@@ -55,6 +69,7 @@ export class Achievement{
         achievement.text = templateValues.text;
         achievement.score = templateValues.score;
         achievement.badgeName = templateValues.badge;
+        achievement.recurring = templateValues.recurring || false;
         return achievement;
     }
 }

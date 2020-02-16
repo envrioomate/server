@@ -14,6 +14,9 @@ import {IUserChallenge} from "../entity/game-state/IUserChallenge";
 import {RedisClient} from "redis";
 import {publish, subscribe} from "../util/EventUtil";
 import {error} from "util";
+import {Achievement} from "../entity/wiki-content/Achievement";
+import {AchievementSelection} from "../entity/game-state/AchievementSelection";
+import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 
 const {promisify} = require('util');
 @Service()
@@ -103,6 +106,9 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         @InjectRepository(ChallengeCompletion) private readonly challengeCompletionRepository: Repository<ChallengeCompletion>,
         @InjectRepository(ChallengeRejection) private readonly challengeRejectionRepository: Repository<ChallengeRejection>,
         @InjectRepository(ChallengeReplacement) private readonly challengeReplacementRepository: Repository<ChallengeReplacement>,
+        @InjectRepository(Achievement) private readonly achievementRepository: Repository<Achievement>,
+        @InjectRepository(AchievementSelection) private readonly achievementSelectionRepository: Repository<AchievementSelection>,
+        @InjectRepository(AchievementCompletion) private readonly achievementCompletionRepository: Repository<AchievementCompletion>,
     ) {
         console.log("Starting GameProgressionManager...");
         this.getRedisAsync = promisify(this.redisClient.get).bind(this.redisClient);
@@ -235,5 +241,27 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         return (await this.getCurrentSeasonPlan()).challenges.then(seasonPlanChallenges =>
             seasonPlanChallenges.find(
                 sp => sp.id == seasonPlanChallengeId));
+    }
+
+    public async getCurrentlySelectedAchievementsForUser(user: User) {
+        return this.achievementSelectionRepository.find({where: {owner: user}});
+    }
+
+    public async selectAchievement(user: User, achievementName: string) {
+        let achievement = await this.achievementRepository.findOne(achievementName);
+        let selection = new AchievementSelection();
+        selection.owner = Promise.resolve(user);
+        selection.achievement = Promise.resolve(achievement);
+
+        return this.achievementSelectionRepository.save(selection);
+    }
+    public async completeAchievement(user: User, achievementSelectionId: number) {
+        let achievementSelection = await this.achievementSelectionRepository.findOne(achievementSelectionId);
+        let completion = new AchievementCompletion();
+        completion.owner = Promise.resolve(user);
+        completion.achievement = Promise.resolve(await achievementSelection.achievement);
+        completion.achievementSelection = Promise.resolve(achievementSelection);
+        //TODO Add score to user
+        return this.achievementCompletionRepository.save(completion);
     }
 }
