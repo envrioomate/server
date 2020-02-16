@@ -98,6 +98,10 @@ export class Badge {
     @Column({nullable: true})
     score?: number;
 
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    externalLink?: String;
+
     @Field(type => Date)
     @CreateDateColumn()
     createdAt: Date;
@@ -136,7 +140,7 @@ export class Badge {
         badge.title = challengeTemplate.title;
         badge.text = challengeTemplate.text;
         badge.score = challengeTemplate.score || 2;
-
+        badge.externalLink = challengeTemplate.externalLink;
         let badgeGoals = new BadgeGoals();
         badgeGoals.badgeGoalType = badgeGoals.strToBadgeGoalType(challengeTemplate.badgeGoalType);
         badgeGoals.minCompletion = challengeTemplate.minCompletion;
