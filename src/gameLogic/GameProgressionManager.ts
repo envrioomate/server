@@ -247,8 +247,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     }
 
     public async selectAchievement(user: User, achievementName: string) {
-        let achievement = await this.achievementRepository.findOne(achievementName);
-        console.log(achievement);
+        let achievement = await this.achievementRepository.findOne({where: {achievementName: achievementName}});
         let selection = new AchievementSelection();
         selection.owner = Promise.resolve(user);
         selection.achievement = Promise.resolve(achievement);
@@ -256,7 +255,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         return this.achievementSelectionRepository.save(selection);
     }
     public async completeAchievement(user: User, achievementSelectionId: number) {
-        let achievementSelection = await this.achievementSelectionRepository.findOne(achievementSelectionId);
+        let achievementSelection = await this.achievementSelectionRepository.findOne({where: {id: achievementSelectionId}});
         let completion = new AchievementCompletion();
         completion.owner = Promise.resolve(user);
         completion.achievement = Promise.resolve(await achievementSelection.achievement);
