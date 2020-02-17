@@ -200,9 +200,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             }
         });
         console.log(existingChallengeCompletion);
-        if (existingChallengeCompletion) return existingChallengeCompletion;
         // complete challenge
-        let challengeCompletion: ChallengeCompletion = new ChallengeCompletion();
+        let challengeCompletion: ChallengeCompletion = existingChallengeCompletion ? existingChallengeCompletion : new ChallengeCompletion();
         challengeCompletion.owner = Promise.resolve(user);
         challengeCompletion.seasonPlanChallenge = Promise.resolve(seasonPlanChallenge);
         challengeCompletion.challengeGoalCompletionLevel = challengeGoalCompletionLevel;
@@ -249,10 +248,11 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     public async selectAchievement(user: User, achievementName: string) {
         let achievement = await this.achievementRepository.findOne(achievementName);
+        console.log(achievement);
         let selection = new AchievementSelection();
         selection.owner = Promise.resolve(user);
         selection.achievement = Promise.resolve(achievement);
-
+        console.log(selection);
         return this.achievementSelectionRepository.save(selection);
     }
     public async completeAchievement(user: User, achievementSelectionId: number) {
