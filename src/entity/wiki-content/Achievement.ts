@@ -49,8 +49,16 @@ export class Achievement{
     props: Promise<Props>;
 
     @Field(type => Boolean)
-    @Column()
+    @Column({default: false})
     recurring: boolean;
+
+    @Field(type => Int)
+    @Column({default: 12})
+    weeks: number;
+
+    @Field(type => Int)
+    @Column({default: 1})
+    weekFrequency: number;
 
     @Field(type => [AchievementSelection], {nullable: true})
     @OneToMany(type => AchievementSelection, as => as.achievement, {nullable: true})
@@ -70,6 +78,8 @@ export class Achievement{
         achievement.score = templateValues.score;
         achievement.badgeName = templateValues.badge;
         achievement.recurring = templateValues.recurring || false;
+        achievement.weeks = templateValues.weeks || 12;
+        achievement.weekFrequency = templateValues.weekFrequency || 1;
         return achievement;
     }
 }

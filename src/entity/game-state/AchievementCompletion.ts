@@ -1,8 +1,17 @@
-import {CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {Field, Int, ObjectType} from "type-graphql";
+import {Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {User} from "../user/User";
 import {Achievement} from "../wiki-content/Achievement";
 import {AchievementSelection} from "./AchievementSelection";
+
+export enum AchievementCompletionType {
+    COMPLETED = 0, TIMED_OUT = 1, RECURRING = 2, RECURRING_TIMED_OUT = 3
+}
+
+registerEnumType(AchievementCompletionType, {
+    name: "AchievementCompletionType",
+    description: "Stores the achieved ChallengeGoal. If null assume MIN"
+});
 
 
 @Entity()
@@ -31,4 +40,9 @@ export class AchievementCompletion {
     @Field(type => AchievementSelection)
     @ManyToOne(type => AchievementSelection, as => as.achievementCompletions)
     achievementSelection: Promise<AchievementSelection>;
+
+    @Field(type => AchievementCompletionType)
+    @Column()
+    achievementCompletionType: AchievementCompletionType;
+
 }
