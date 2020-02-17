@@ -200,9 +200,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             }
         });
         console.log(existingChallengeCompletion);
-        if (existingChallengeCompletion) return existingChallengeCompletion;
         // complete challenge
-        let challengeCompletion: ChallengeCompletion = new ChallengeCompletion();
+        let challengeCompletion: ChallengeCompletion = existingChallengeCompletion ? existingChallengeCompletion : new ChallengeCompletion();
         challengeCompletion.owner = Promise.resolve(user);
         challengeCompletion.seasonPlanChallenge = Promise.resolve(seasonPlanChallenge);
         challengeCompletion.challengeGoalCompletionLevel = challengeGoalCompletionLevel;
