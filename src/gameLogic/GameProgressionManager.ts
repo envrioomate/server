@@ -248,6 +248,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     public async selectAchievement(user: User, achievementName: string) {
         let achievement = await this.achievementRepository.findOne({where: {achievementName: achievementName}});
+        let achievementSelection = await this.achievementSelectionRepository.findOne({where: {achievement: achievement, owner: user}});
+        if(achievementSelection) return achievementSelection;
         let selection = new AchievementSelection();
         selection.owner = Promise.resolve(user);
         selection.achievement = Promise.resolve(achievement);
