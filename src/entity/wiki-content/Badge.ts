@@ -135,6 +135,10 @@ export class Badge {
     @OneToMany(type => Achievement, a => a.badge, {cascade: true})
     achievements: Promise<Achievement[]>;
 
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    quantityName?: String;
+
     static fromTemplate(challengeTemplate): Badge {
         let badge = new Badge();
         badge.name = challengeTemplate.name;
@@ -142,6 +146,7 @@ export class Badge {
         badge.text = challengeTemplate.text;
         badge.score = challengeTemplate.score || 2;
         badge.externalLink = challengeTemplate.externalLink;
+        badge.quantityName = challengeTemplate.quantityName;
         let badgeGoals = new BadgeGoals();
         badgeGoals.badgeGoalType = badgeGoals.strToBadgeGoalType(challengeTemplate.badgeGoalType);
         badgeGoals.minCompletion = challengeTemplate.minCompletion;
