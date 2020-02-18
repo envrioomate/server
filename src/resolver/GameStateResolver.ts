@@ -8,6 +8,7 @@ import {ChallengeRejection} from "../entity/game-state/ChallengeRejection";
 import {IUserChallenge} from "../entity/game-state/IUserChallenge";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
+import {User} from "../entity/user/User";
 
 @Resolver()
 export class GameStateResolver {
@@ -31,6 +32,11 @@ export class GameStateResolver {
         return this.mgmr.getCurrentChallengesForUser(user);
     }
 
+    @Query(returns => [ChallengeCompletion], {nullable: true})
+    public async getCompletedChallenges(@Ctx() {user}): Promise<ChallengeCompletion[]> {
+        return this.mgmr.getCompletedChallengesForUser(user);
+    }
+
     @Query(returns => [AchievementSelection], {nullable: true})
     async currentlySelectedAchievements(@Ctx() {user}): Promise<AchievementSelection[]> {
         return this.mgmr.getCurrentlySelectedAchievementsForUser(user);
@@ -42,7 +48,7 @@ export class GameStateResolver {
 
     }
     @Mutation(returns => AchievementCompletion, {nullable: true})
-    async completeAchievement(@Ctx() {user}, @Arg("achievementSelectionId", type => Int) achievementSelectionId: number): Promise<AchievementSelection>{
+    async completeAchievement(@Ctx() {user}, @Arg("achievementSelectionId", type => Int) achievementSelectionId: number): Promise<AchievementCompletion>{
         return this.mgmr.completeAchievement(user, achievementSelectionId);
     }
 
