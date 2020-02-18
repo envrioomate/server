@@ -47,7 +47,7 @@ export class ChallengeCompletion {
     challengeGoalCompletionLevel: ChallengeGoalCompletionLevel;
 
     @Field(type => Number, {nullable: true})
-    @Column()
+    @Column({type: "double"})
     challengeCompletionQuantity: number; //null if qualitative Badge
 
 
