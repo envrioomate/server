@@ -11,7 +11,7 @@ import {Thema} from "./Thema";
 import {Props} from "./Props";
 import {Kategorie} from "./Kategorie";
 import {Oberthema} from "./Oberthema";
-import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
+import {Field, Float, Int, ObjectType, registerEnumType} from "type-graphql";
 import {WikiImage} from "./WikiImage";
 import {Achievement} from "./Achievement";
 
@@ -39,35 +39,35 @@ export class BadgeGoals {
     @Column()
     minCompletion: String;
 
-    @Field(type => Int, {nullable: true})
-    @Column({nullable: true})
+    @Field(type => Float, {nullable: true})
+    @Column({type: "double", nullable: true})
     minQuantity?: number;
 
     @Field(type => String)
     @Column()
     medCompletion: String;
 
-    @Field(type => Int, {nullable: true})
-    @Column({nullable: true})
+    @Field(type => Float, {nullable: true})
+    @Column({type: "double", nullable: true})
     medQuantity?: number;
 
     @Field(type => String)
     @Column()
     goodCompletion: String;
 
-    @Field(type => Int, {nullable: true})
-    @Column({nullable: true})
+    @Field(type => Float, {nullable: true})
+    @Column({type: "double", nullable: true})
     goodQuantity?: number;
 
     @Field(type => String)
     @Column()
     maxCompletion: String;
 
-    @Field(type => Int, {nullable: true})
-    @Column({nullable: true})
+    @Field(type => Float, {nullable: true})
+    @Column({type: "double", nullable: true})
     maxQuantity?: number;
 
-    strToBadgeGoalType(goalType: string) {
+    static strToBadgeGoalType(goalType: string) {
         switch (goalType) {
             case("QUALITATIVE"): return BadgeGoalType.QUALITATIVE;
             case("QUANTITATIVE_ASC"): return BadgeGoalType.QUANTITY_ASC;
@@ -148,7 +148,7 @@ export class Badge {
         badge.externalLink = challengeTemplate.externalLink;
         badge.quantityName = challengeTemplate.quantityName;
         let badgeGoals = new BadgeGoals();
-        badgeGoals.badgeGoalType = badgeGoals.strToBadgeGoalType(challengeTemplate.badgeGoalType);
+        badgeGoals.badgeGoalType = BadgeGoals.strToBadgeGoalType(challengeTemplate.badgeGoalType);
         badgeGoals.minCompletion = challengeTemplate.minCompletion;
         badgeGoals.minQuantity = challengeTemplate.minQuantity;
         badgeGoals.medCompletion = challengeTemplate.medCompletion;
