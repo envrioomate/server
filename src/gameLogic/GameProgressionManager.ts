@@ -3,7 +3,7 @@ import {Badge} from "../entity/wiki-content/Badge";
 import {ChallengeCompletion, ChallengeGoalCompletionLevel} from "../entity/game-state/ChallengeCompletion";
 import {SeasonPlanChallenge} from "../entity/game-state/SeasonPlanChallenge";
 import {InjectRepository} from "typeorm-typedi-extensions";
-import {EntitySubscriberInterface, EventSubscriber, In, InsertEvent, LessThan, MoreThan, Repository} from "typeorm";
+import {EntitySubscriberInterface, EventSubscriber, InsertEvent, LessThan, MoreThan, Repository} from "typeorm";
 import {User} from "../entity/user/User";
 import {Season} from "../entity/game-state/Season";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
@@ -16,7 +16,8 @@ import {publish, subscribe} from "../util/EventUtil";
 import {error} from "util";
 import {Achievement} from "../entity/wiki-content/Achievement";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
-import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
+import {AchievementCompletion, AchievementCompletionType} from "../entity/game-state/AchievementCompletion";
+import moment = require("moment");
 
 const {promisify} = require('util');
 @Service()
@@ -260,12 +261,25 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     public async completeAchievement(user: User, achievementSelectionId: number) {
         let achievementSelection = await this.achievementSelectionRepository.findOne({where: {id: achievementSelectionId}});
         let achievementCompletion = await this.achievementCompletionRepository.find({where: {achievementSelection: achievementSelection, owner: user}});
-        if(achievementCompletion[0]) return achievementCompletion[0];
+
+        //TODO Gate based on frequency
+        if(achievementCompletion.length > 0) {
+            achievementCompletion.sort((a,b) => {
+                return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            });
+            let lastCompletion = achievementCompletion[achievementCompletion.length - 1] ;
+            let now = moment();
+            let input = moment(lastCompletion.updatedAt);
+            let isThisWeek = (now.isoWeek() == input.isoWeek())
+            return lastCompletion
+        }
+
 
         let completion = new AchievementCompletion();
         completion.owner = Promise.resolve(user);
         completion.achievement = Promise.resolve(await achievementSelection.achievement);
         completion.achievementSelection = Promise.resolve(achievementSelection);
+        completion.achievementCompletionType = AchievementCompletionType.COMPLETED;
         //TODO Add score to user
         return this.achievementCompletionRepository.save(completion);
     }
