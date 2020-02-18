@@ -8,6 +8,7 @@ import {ChallengeRejection} from "../entity/game-state/ChallengeRejection";
 import {IUserChallenge} from "../entity/game-state/IUserChallenge";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
+import {User} from "../entity/user/User";
 
 @Resolver()
 export class GameStateResolver {
@@ -29,6 +30,11 @@ export class GameStateResolver {
     @Query(returns => [IUserChallenge], {nullable: true})
     async currentChallenges(@Ctx() {user}): Promise<IUserChallenge[]> {
         return this.mgmr.getCurrentChallengesForUser(user);
+    }
+
+    @Query(returns => [ChallengeCompletion], {nullable: true})
+    public async getCompletedChallenges(@Ctx() {user}): Promise<ChallengeCompletion[]> {
+        return this.mgmr.getCompletedChallengesForUser(user);
     }
 
     @Query(returns => [AchievementSelection], {nullable: true})

@@ -233,8 +233,11 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         console.log(await challenges.map(challenge => challenge.challenge.then(async c => await c.thema)));
 
          return challenges;
+    }
 
 
+    public async getCompletedChallengesForUser(user: User): Promise<ChallengeCompletion[]> {
+        return  this.challengeCompletionRepository.find({where: {owner: user}})
     }
 
     private async getSeasonPlanChallengeFromCurrentSeasonPlanById(seasonPlanChallengeId: number): Promise<SeasonPlanChallenge> {
