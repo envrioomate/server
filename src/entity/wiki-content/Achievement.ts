@@ -60,6 +60,10 @@ export class Achievement{
     @Column({default: 1})
     weekFrequency: number;
 
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    externalLink?: String;
+
     @Field(type => [AchievementSelection], {nullable: true})
     @OneToMany(type => AchievementSelection, as => as.achievement, {nullable: true})
     achievementSelections?: Promise<AchievementSelection[]> ;
@@ -80,6 +84,7 @@ export class Achievement{
         achievement.recurring = templateValues.recurring || false;
         achievement.weeks = templateValues.weeks || 12;
         achievement.weekFrequency = templateValues.weekFrequency || 1;
+        achievement.externalLink = templateValues.extenalLink;
         return achievement;
     }
 }
