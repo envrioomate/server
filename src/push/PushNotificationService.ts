@@ -8,7 +8,9 @@ import * as schedule from 'node-schedule';
 import {subscribe} from "../util/EventUtil";
 import {Membership} from "../entity/social/Membership";
 import {FeedComment} from "../entity/social/FeedComment";
+import {Service} from "typedi";
 
+@Service()
 export class PushNotificationService {
     private expo = new Expo();
 

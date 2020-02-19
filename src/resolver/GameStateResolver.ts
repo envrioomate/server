@@ -42,6 +42,11 @@ export class GameStateResolver {
         return this.mgmr.getCurrentlySelectedAchievementsForUser(user);
     }
 
+    @Query(returns => Number)
+    async score(@Ctx() {user}): Promise<number> {
+        return user.score;
+    }
+
     @Mutation(returns => AchievementSelection, {nullable: true})
     async selectAchievement(@Ctx() {user}, @Arg("achievementName", type => String) achievementName: string): Promise<AchievementSelection>{
         return this.mgmr.selectAchievement(user, achievementName);

@@ -1,14 +1,14 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
     BeforeInsert,
-    ManyToOne,
-    OneToOne,
+    Column,
     CreateDateColumn,
-    JoinColumn, OneToMany
+    Entity, getRepository,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn
 } from "typeorm";
-import {ObjectType, Field, Int} from "type-graphql";
+import {Field, Int, ObjectType} from "type-graphql";
 import * as bcrypt from 'bcrypt-nodejs';
 import {Membership} from "../social/Membership";
 import {PasswordResetToken} from "./PasswordResetToken";
@@ -22,6 +22,7 @@ import {Notification} from "./Notification";
 import {Subscription} from "./Subscription";
 import {AchievementSelection} from "../game-state/AchievementSelection";
 import {AchievementCompletion} from "../game-state/AchievementCompletion";
+import {Badge} from "../wiki-content/Badge";
 
 export enum Role {
     User = 0,
@@ -76,7 +77,7 @@ export class User { //TODO split into profile data and user data
 
 
     @OneToOne(type => Subscription, s => s.user, {nullable: true})
-    @Field(type => Subscription,{nullable: true})
+    @Field(type => Subscription, {nullable: true})
     subscription?: Promise<Subscription>;
 
     @Field(type => Media, {nullable: true})
@@ -113,16 +114,19 @@ export class User { //TODO split into profile data and user data
 
     @Field(type => [AchievementSelection], {nullable: true})
     @OneToMany(type => AchievementSelection, as => as.owner, {nullable: true})
-    achievementSelections?: Promise<AchievementSelection[]> ;
-
+    achievementSelections?: Promise<AchievementSelection[]>;
 
     @Field(type => [AchievementCompletion], {nullable: true})
     @OneToMany(type => AchievementCompletion, as => as.owner, {nullable: true})
-    achievementCompletions?: Promise<AchievementCompletion[]> ;
+    achievementCompletions?: Promise<AchievementCompletion[]>;
+
+    @Field(type => Int)
+    @Column({default: 0})
+    score: number;
 
     @BeforeInsert()
-    public encrypt () {
-        if(this.password)
+    public encrypt() {
+        if (this.password)
             this.hash = bcrypt.hashSync(this.password, bcrypt.genSaltSync()); //TODO make more async
     }
 
@@ -130,25 +134,57 @@ export class User { //TODO split into profile data and user data
         return bcrypt.compareSync(candidate, this.hash)
     }
 
-    public transfer(fullProfile : boolean = false) {
+    public transfer(fullProfile: boolean = false) {
         let o;
         if (fullProfile) {
-            o =   {
-                id : this.id,
-                userName : this.userName,
+            o = {
+                id: this.id,
+                userName: this.userName,
                 screenName: this.screenName,
                 dateCreated: this.dateCreated,
-                emailConfirmed : this.emailConfirmed,
-                isBanned : this.isBanned,
+                emailConfirmed: this.emailConfirmed,
+                isBanned: this.isBanned,
                 hasGroup: !!this.memberships
             }
         } else {
-            o =   {
-                id : this.id,
+            o = {
+                id: this.id,
                 screenName: this.screenName
             }
         }
 
         return o;
+    }
+
+    public async recalculateScore() {
+        let achievementCompletions = (await this.achievementCompletions.catch((err) => {
+            console.error(err);
+            return null
+        }));
+        let achievementScores = await Promise.all(
+            achievementCompletions.map(async (ac) => {
+                return (await ac.achievement).score
+            })).catch((err) => {
+            console.error(err);
+            return null
+        });
+
+        let badgeCompletions = await this.challengeCompletions.catch((err) => {
+            console.error(err);
+            return null
+        });
+        let badgeScores = await Promise.all(
+            badgeCompletions.map(async (bc) => {
+                let badge: Badge = await (await bc.seasonPlanChallenge).challenge || null; // TODO consider completion level for scoring?
+                return badge.score;
+            })).catch((err) => {
+            console.error(err);
+            return null
+        });
+        const sum = (accumulator: number = 0, value: number) => accumulator + value;
+        const achievementScore = achievementScores.reduce(sum, 0);
+        const badgeScore = badgeScores.reduce(sum, 0);
+        this.score = achievementScore + badgeScore;
+        getRepository(User).save(this).catch(err => console.error(err));
     }
 }

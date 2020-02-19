@@ -284,6 +284,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         completion.achievementSelection = Promise.resolve(achievementSelection);
         completion.achievementCompletionType = AchievementCompletionType.COMPLETED;
         //TODO Add score to user
-        return this.achievementCompletionRepository.save(completion);
+        completion = await this.achievementCompletionRepository.save(completion);
+        publish(completion, "add", true);
+        return completion;
     }
 }
