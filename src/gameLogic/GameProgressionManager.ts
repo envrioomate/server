@@ -168,20 +168,25 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     }
 
     private async findCurrentSeasonPlan(season: Season): Promise<SeasonPlan> { //TODO wait for start offset date
-        let timeInSeason = (Date.now() - (season.startOffsetDate.getTime())) / 1000;
+        let timeInSeason = (Date.now() - (season.startOffsetDate.getTime()) ) / 1000;
         if (timeInSeason < 0) {
             // we are in the season startDate - startOffsetDate gap, so no SeasonPlan should be activated.
             // TODO define meaningful pre-season text
             return undefined
         }
         let seasonPlans = await season.seasonPlan;
+        seasonPlans.sort((a,b) => b.position - a.position)
         console.log(timeInSeason, seasonPlans);
-        return seasonPlans.slice(0).reduce((acc, cur) => { // don't do that to reduce, it has done nothing wrong! :(
+        let currentSeasonPlan =  seasonPlans.slice(0).reduce((acc, cur) => { // don't do that to reduce, it has done nothing wrong! :(
             timeInSeason = timeInSeason - cur.duration;
             if (timeInSeason <= 0) {
+                console.log("get sp: ", timeInSeason, cur)
                 return cur;
             }
         }, undefined)
+        console.log(await currentSeasonPlan);
+
+        return currentSeasonPlan
     }
 
     public async completeChallenge(user: User, seasonPlanChallengeId: number, challengeGoalCompletionLevel: ChallengeGoalCompletionLevel, challengeCompletionQuantity: number): Promise<ChallengeCompletion> {

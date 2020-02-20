@@ -2,7 +2,7 @@
 const moo = require("moo");
 const lexer = moo.compile({
   ws: {match: /\s+/, lineBreaks: true},
-  word: {match: /[^\{\{\}\}\|\s=]+/, lineBreaks: true},
+  word: {match: /[^\{\{\}\}\|\s\n\t=]+/, lineBreaks: true},
   open: /\{\{/,
   close:/\}\}/,
   delim: /\|/,
@@ -11,7 +11,7 @@ const lexer = moo.compile({
 %}
 @lexer lexer
 main -> (template external):+ {% function(d) {return d[0].map(val => val[0])}%}
-external -> word:* {% function(d) {return null;} %}
+external -> (word ws:* %eq:* %delim:* ws:?):* {% function(d) {return null;} %}
 template -> %open ws:* templateName templateValues ws:* %close ws:* {%
   function(d) {
     let template = {...d[2], ...d[3]}
