@@ -10,6 +10,7 @@ import {Membership} from "../entity/social/Membership";
 import {FeedComment} from "../entity/social/FeedComment";
 import {Container, Service} from "typedi";
 import {FeedPost} from "../entity/social/FeedPost";
+import {SeasonPlan} from "../entity/game-state/SeasonPlan";
 
 @Service()
 export class PushNotificationService {
@@ -123,8 +124,42 @@ export class PushNotificationService {
     }
 
     @subscribe(FeedComment)
-    public async commentListener() {
+    public async commentListener(_feedComment: FeedComment, action: string) {
 
+        let feedComment = await getRepository(FeedComment).findOneOrFail(_feedComment.id);
+        let feedCommentAuthor = (await feedComment.author).screenName;
+        let parent = await feedComment.parent || null;
+
+        if(parent) {
+            let parentAuthor = await parent.author;
+            let subscription = await parentAuthor.subscription;
+            if (subscription) {
+                let notification = new Notification();
+                notification.user = Promise.resolve(parentAuthor);
+                notification.subscription = subscription;
+                notification.status = "pending";
+                notification.title = `Neuer Kommentar` ;
+                notification.body = `${feedCommentAuthor} hat auf deinen Kommentar geantwortet `;
+                notification.icon = "md-chatbubbles";
+                return notification;
+            }
+        }
+
+        let post = await feedComment.post || null;
+        if(post) {
+            let parentAuthor = await parent.author;
+            let subscription = await parentAuthor.subscription;
+            if (subscription) {
+                let notification = new Notification();
+                notification.user = Promise.resolve(parentAuthor);
+                notification.subscription = subscription;
+                notification.status = "pending";
+                notification.title = `Neuer Kommentar`;
+                notification.body = `${feedCommentAuthor} hat auf deinen Post ${post.title}`;
+                notification.icon = "md-chatbubbles";
+                return notification;
+            }
+        }
     }
 
     @subscribe(FeedPost)
@@ -157,11 +192,27 @@ export class PushNotificationService {
 
     }
 
-    public async notifyCommentReply() {
+    @subscribe(SeasonPlan)
+    public async notifyNewSeasonPlan(_seasonPlan: SeasonPlan, action) {
 
-    }
+        let seasonPlan = await getRepository(SeasonPlan).findOne(_seasonPlan.id);
+        let thema = await seasonPlan.thema;
+        let currentSubscriptions = await getRepository(Subscription).find().catch(err => console.error(err)) || null;
 
-    public async notifyNewSeasonPlan() {
+        let pendingNotifications = await Promise.all(currentSubscriptions.map(async value => {
+            let notification = new Notification();
+            notification.user = Promise.resolve(await value.user);
+            notification.subscription = value;
+            notification.status = "pending";
+            notification.title = "Neues Thema";
+            notification.body = thema.title || thema.name;
+            notification.icon = "md-information-circle-outline";
+            return notification;
+        })) || null;
+
+        let notifications = await getRepository(Notification).save(pendingNotifications).catch(err => console.error(err));
+        console.log(notifications);
+        return;
 
     }
 

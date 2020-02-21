@@ -109,10 +109,10 @@ export class Tasks {
             dkim: false,
         })
         sendmail({
-            from: 'no-reply@enviroommate.org',
+            from: 'no-reply@k4all.dastreibendewerk.de',
             to: token.user.userName,
             subject: 'Enviroommate Passwort zurücksetzen',
-            text: 'https://enviroommate.org/#/resetPassword?resettoken=' + token.resetToken,
+            text: 'https://k4all.dastreibendewerk.de/app/api/resetPassword?resettoken=' + token.resetToken,
         }, function(err, reply) {
             console.log(err && err.stack);
             console.log(reply);
