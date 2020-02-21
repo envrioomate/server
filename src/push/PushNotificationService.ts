@@ -70,6 +70,7 @@ export class PushNotificationService {
                         title: notification.title,
                         icon: notification.icon,
                         body: notification.body,
+                        path: notification.path
                     }
                 };
             }
