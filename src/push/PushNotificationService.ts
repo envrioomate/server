@@ -130,6 +130,7 @@ export class PushNotificationService {
         let feedCommentAuthor = (await feedComment.author).screenName;
         let parent = await feedComment.parent || null;
 
+
         if(parent) {
             let parentAuthor = await parent.author;
             let subscription = await parentAuthor.subscription;
@@ -147,7 +148,7 @@ export class PushNotificationService {
 
         let post = await feedComment.post || null;
         if(post) {
-            let parentAuthor = await parent.author;
+            let parentAuthor = await post.author;
             let subscription = await parentAuthor.subscription;
             if (subscription) {
                 let notification = new Notification();

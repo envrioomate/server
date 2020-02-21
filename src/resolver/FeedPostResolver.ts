@@ -198,7 +198,7 @@ export class FeedPostResolver {
         comment.post = Promise.resolve(post);
         comment.author = Promise.resolve(user);
         comment = await this.feedCommentRepository.save(comment);
-        publish(post, 'add');
+        publish(comment, 'add');
 
         return comment;
     }
