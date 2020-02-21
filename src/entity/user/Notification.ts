@@ -1,19 +1,8 @@
-import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
 import {User} from "./User";
 import {TeamResolverErrors} from "../../resolver/TeamResolver";
-
-enum NotificationIcon {
-    CHALLENGE = 'md-group',
-    TEAM = 'md-person',
-    FEED = 'list',
-    OTHER = 'md-notifications-outline'
-}
-
-registerEnumType(NotificationIcon, {
-    name: 'NotificationIcon',
-    description: 'Sets icons on notifications for notifications view'
-});
+import {Subscription} from "./Subscription";
 
 @Entity()
 @ObjectType()
@@ -26,6 +15,10 @@ export class Notification {
     @Field(type => User)
     user: Promise<User>;
 
+    @ManyToOne(type => Subscription, {eager: true})
+    @Field(type => Subscription)
+    subscription: Subscription;
+
     @Column()
     @Field(type => String)
     title: string;
@@ -36,13 +29,13 @@ export class Notification {
 
     @Column()
     @Field(type => String)
-    icon: NotificationIcon;
+    icon: string;
 
     @Column()
     @Field(type => String)
     status: 'delivered'|'sent'|'pending'|'failed';
 
-    @Column()
+    @Column({nullable: true})
     @Field(type => Int)
     ticketId: string;
 }

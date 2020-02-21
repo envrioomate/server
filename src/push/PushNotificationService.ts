@@ -1,14 +1,15 @@
 import Expo, {ExpoPushMessage, ExpoPushTicket} from 'expo-server-sdk';
 import {Subscription} from "../entity/user/Subscription";
 import {InjectRepository} from "typeorm-typedi-extensions";
-import {Repository} from "typeorm";
+import {getRepository, Repository} from "typeorm";
 import {Notification} from "../entity/user/Notification";
 import {User} from "../entity/user/User";
 import * as schedule from 'node-schedule';
 import {subscribe} from "../util/EventUtil";
 import {Membership} from "../entity/social/Membership";
 import {FeedComment} from "../entity/social/FeedComment";
-import {Service} from "typedi";
+import {Container, Service} from "typedi";
+import {FeedPost} from "../entity/social/FeedPost";
 
 @Service()
 export class PushNotificationService {
@@ -126,7 +127,33 @@ export class PushNotificationService {
 
     }
 
-    public async notifyPostComment() {
+    @subscribe(FeedPost)
+    public async notifyPostComment(_feedPost: FeedPost, action: string) {
+
+        if(action !== "pinned") return;
+
+        let post = await getRepository(FeedPost).findOne(_feedPost.id);
+        if(!post) {
+            console.error("empty post");
+            return;
+        }
+
+        let currentSubscriptions = await getRepository(Subscription).find().catch(err => console.error(err)) || null;
+
+        let pendingNotifications = currentSubscriptions.map(value => {
+            let notification = new Notification();
+            notification.user = value.user;
+            notification.subscription = value;
+            notification.status = "pending";
+            notification.title = "K4All News";
+            notification.body = post.title;
+            notification.icon = "md-information-circle-outline";
+            return notification;
+        })
+
+        let notifications = await getRepository(Notification).save(pendingNotifications).catch(err => console.error(err));
+        console.log(notifications);
+        return;
 
     }
 

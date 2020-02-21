@@ -112,9 +112,18 @@ export class FeedPostResolver {
         if(user.role !== Role.Admin) {
             post.isPinned = false;
         }
+
+
+
         console.log(postInput)
         console.log(post);
-        return this.feedPostRepository.save(post);
+        post = await this.feedPostRepository.save(post);
+
+        if(post.isPinned) {
+            publish(post, "pinned");
+        }
+
+        return post;
     }
 
     @Mutation(returns => Boolean)
