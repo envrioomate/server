@@ -23,6 +23,10 @@ export class Notification {
     @Field(type => String)
     title: string;
 
+    @Column({nullable: true})
+    @Field(type => String, {nullable: true})
+    path?: string;
+
     @Column()
     @Field(type => String)
     body: string;

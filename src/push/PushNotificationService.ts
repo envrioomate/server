@@ -91,6 +91,7 @@ export class PushNotificationService {
                 title: 'Hello',
                 icon: 'md-star',
                 body: 'This is a test notification',
+                path: 'App/ProfileTab'
             },
         };
         await this.expo.sendPushNotificationsAsync([message])
@@ -129,6 +130,7 @@ export class PushNotificationService {
         let feedComment = await getRepository(FeedComment).findOneOrFail(_feedComment.id);
         let feedCommentAuthor = (await feedComment.author).screenName;
         let parent = await feedComment.parent || null;
+        let post = await feedComment.post || null;
 
 
         if(parent) {
@@ -140,13 +142,14 @@ export class PushNotificationService {
                 notification.subscription = subscription;
                 notification.status = "pending";
                 notification.title = `Neuer Kommentar` ;
-                notification.body = `${feedCommentAuthor} hat auf deinen Kommentar geantwortet `;
+                notification.body = `${feedCommentAuthor} hat auf deinen Kommentar geantwortet`;
                 notification.icon = "md-chatbubbles";
+                notification.path = "App/FeedTab/" + post.id
+
                 getRepository(Notification).save(notification).catch(err => console.error(err));
             }
         }
 
-        let post = await feedComment.post || null;
         if(post) {
             let parentAuthor = await post.author;
             let subscription = await parentAuthor.subscription;
@@ -156,15 +159,17 @@ export class PushNotificationService {
                 notification.subscription = subscription;
                 notification.status = "pending";
                 notification.title = `Neuer Kommentar`;
-                notification.body = `${feedCommentAuthor} hat auf deinen Post ${post.title}`;
+                notification.body = `${feedCommentAuthor} hat auf deinen Post ${post.title} geantwortet`;
                 notification.icon = "md-chatbubbles";
+                notification.path = "App/FeedTab/" + post.id
+
                 getRepository(Notification).save(notification).catch(err => console.error(err));
             }
         }
     }
 
     @subscribe(FeedPost)
-    public async notifyPostComment(_feedPost: FeedPost, action: string) {
+    public async feedPostListener(_feedPost: FeedPost, action: string) {
 
         if(action !== "pinned") return;
 
@@ -184,6 +189,8 @@ export class PushNotificationService {
             notification.title = "K4All News";
             notification.body = post.title;
             notification.icon = "md-information-circle-outline";
+            notification.path = "App/FeedTab/" + post.id
+
             return notification;
         })) || null;
 
@@ -194,7 +201,7 @@ export class PushNotificationService {
     }
 
     @subscribe(SeasonPlan)
-    public async notifyNewSeasonPlan(_seasonPlan: SeasonPlan, action) {
+    public async seasonPlanListener(_seasonPlan: SeasonPlan, action) {
 
         let seasonPlan = await getRepository(SeasonPlan).findOne(_seasonPlan.id);
         let thema = await seasonPlan.thema;
@@ -208,6 +215,7 @@ export class PushNotificationService {
             notification.title = "Neues Thema";
             notification.body = thema.title || thema.name;
             notification.icon = "md-information-circle-outline";
+            notification.path = "App/BadgeTab"
             return notification;
         })) || null;
 
