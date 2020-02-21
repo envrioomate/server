@@ -49,10 +49,10 @@ export class LeaderBoardResolver {
     async getLeaderBoard (
         @Ctx() {user}: Context,
         @Arg('connectionArgs', type => ConnectionArgs) connectionArgs: ConnectionArgs,
-        @Arg('teamSize', type => TeamSize) searchConditions: TeamSize,
+        @Arg('teamSize', type => TeamSize, {nullable: true}) searchConditions?: TeamSize,
     ) {
         const paginatingRepo = getCustomRepository(LeaderBoardRepository);
-        return paginatingRepo.findAndPaginate({teamSize: searchConditions, place: Not(-1)}, {place: "ASC", score: "DESC"}, connectionArgs);
+        return paginatingRepo.findAndPaginate({place: Not(-1)}, {place: "ASC", score: "DESC"}, connectionArgs);
     }
 
     @Authorized("ADMIN")
