@@ -142,7 +142,7 @@ export class PushNotificationService {
                 notification.title = `Neuer Kommentar` ;
                 notification.body = `${feedCommentAuthor} hat auf deinen Kommentar geantwortet `;
                 notification.icon = "md-chatbubbles";
-                return notification;
+                getRepository(Notification).save(notification).catch(err => console.error(err));
             }
         }
 
@@ -158,7 +158,7 @@ export class PushNotificationService {
                 notification.title = `Neuer Kommentar`;
                 notification.body = `${feedCommentAuthor} hat auf deinen Post ${post.title}`;
                 notification.icon = "md-chatbubbles";
-                return notification;
+                getRepository(Notification).save(notification).catch(err => console.error(err));
             }
         }
     }
