@@ -140,16 +140,16 @@ export class PushNotificationService {
 
         let currentSubscriptions = await getRepository(Subscription).find().catch(err => console.error(err)) || null;
 
-        let pendingNotifications = currentSubscriptions.map(value => {
+        let pendingNotifications = await Promise.all(currentSubscriptions.map(async value => {
             let notification = new Notification();
-            notification.user = value.user;
+            notification.user = Promise.resolve(await value.user);
             notification.subscription = value;
             notification.status = "pending";
             notification.title = "K4All News";
             notification.body = post.title;
             notification.icon = "md-information-circle-outline";
             return notification;
-        })
+        })) || null;
 
         let notifications = await getRepository(Notification).save(pendingNotifications).catch(err => console.error(err));
         console.log(notifications);
