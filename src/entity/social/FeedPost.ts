@@ -76,16 +76,18 @@ export class FeedPost {
         return this.likedBy.then((users) => users.some((u) => u.id === user.id));
     }
 
-    @subscribe(FeedPost)
-    public static async updateCommentCountForPost(post: FeedPost) {
-        (await getRepository(FeedPost).preload(post))
-            .updateCommentCount()
-            .catch(err =>console.error(err));
+    @subscribe(FeedComment)
+    public static async updateCommentCountForPost(_comment: FeedComment) {
+        let post = await (await getRepository(FeedComment).findOne(_comment.id)).post || null;
+        if (post) {
+            (await getRepository(FeedPost).preload(post))
+                .updateCommentCount()
+                .catch(err =>console.error(err));
+        }
     }
 
     public async updateCommentCount() {
         const comments = await this.comments;
-        console.log(comments);
         this.commentCount = comments.length;
         return getRepository(FeedPost).save(this);
     }
