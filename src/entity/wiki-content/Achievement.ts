@@ -32,6 +32,10 @@ export class Achievement{
     @Column({nullable: true})
     score?: number;
 
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    maxCompletion: string;
+
     @Field(type => Badge)
     @ManyToOne(type => Badge)
     badge: Promise<Badge>;
@@ -85,6 +89,7 @@ export class Achievement{
         achievement.weeks = templateValues.weeks || 12;
         achievement.weekFrequency = templateValues.weekFrequency || 1;
         achievement.externalLink = templateValues.extenalLink;
+        achievement.maxCompletion = templateValues.maxCompletion || "max";
         return achievement;
     }
 }

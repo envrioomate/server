@@ -95,6 +95,10 @@ export class Badge {
     @Column({type: "text"})
     text: string;
 
+    @Field(type => String, {nullable: true})
+    @Column({nullable: true})
+    hasCompletedText: string;
+
     @Field(type => Int, {nullable: true})
     @Column({nullable: true})
     score?: number;
@@ -147,6 +151,7 @@ export class Badge {
         badge.score = challengeTemplate.score || 2;
         badge.externalLink = challengeTemplate.externalLink;
         badge.quantityName = challengeTemplate.quantityName;
+        badge.hasCompletedText = challengeTemplate.hasCompletedText || null;
         let badgeGoals = new BadgeGoals();
         badgeGoals.badgeGoalType = BadgeGoals.strToBadgeGoalType(challengeTemplate.badgeGoalType);
         badgeGoals.minCompletion = challengeTemplate.minCompletion;
