@@ -1,8 +1,9 @@
 // @see https://github.com/19majkel94/type-graphql/issues/142
-import {ClassType, ReturnTypeFunc, ReturnTypeFuncValue, TypeValue} from "type-graphql/decorators/types";
+import {ClassType} from "type-graphql";
 import * as Relay from 'graphql-relay'
 import {Field, ObjectType} from "type-graphql";
 import {PageData} from "./PaginatingRepository";
+import {TypeValue, ReturnTypeFuncValue} from "type-graphql/dist/decorators/types";
 
 let typemap = {};
 export function connectionTypes<T extends TypeValue>(name: String, nodeType: ClassType<T>): ReturnTypeFuncValue {

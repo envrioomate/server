@@ -2,7 +2,7 @@ import {Arg, Ctx, Int, Mutation, Query, Resolver} from "type-graphql"
 import {Repository} from "typeorm";
 import {InjectRepository} from "typeorm-typedi-extensions";
 import {Context} from "./types/Context";
-import {GraphQLUpload, Upload} from "apollo-upload-server";
+import {GraphQLUpload, Upload} from "graphql-upload";
 import {Media} from "../entity/Media";
 import {generate} from "shortid";
 import * as fs from "fs";

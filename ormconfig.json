@@ -6,7 +6,7 @@
   "password": "test",
   "database": "test",
   "synchronize": true,
-  "logging": true,
+  "logging": false,
   "charset": "utf8mb4",
   "entities": [
     "src/entity/**/*.ts"

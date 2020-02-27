@@ -35,6 +35,9 @@ export class LeaderBoardEntry {
     team: Team;
 }
 
+
+const leaderBoardPage = connectionTypes<Team>('LeaderBoardEntry', Team);
+
 @Resolver()
 export class LeaderBoardResolver {
     constructor(
@@ -45,7 +48,7 @@ export class LeaderBoardResolver {
     ) {
     }
 
-    @Query(returns => connectionTypes<Team>('LeaderBoardEntry', Team), {nullable: true})
+    @Query(returns => leaderBoardPage, {nullable: true})
     async getLeaderBoard (
         @Ctx() {user}: Context,
         @Arg('connectionArgs', type => ConnectionArgs) connectionArgs: ConnectionArgs,

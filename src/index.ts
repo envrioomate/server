@@ -30,7 +30,7 @@ let client: RedisClient = redis.createClient({db: config.redisDb});
 Container.set("redis", client);
 
 TypeORM.useContainer(Container)
-TypeGraphQL.useContainer(Container);
+// TypeGraphQL.useContainer(Container);
 
 TypeORM.createConnection().then(async connection => {
     // setUpCurrentSeason cron-like tasks

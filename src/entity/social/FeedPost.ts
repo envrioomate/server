@@ -15,7 +15,6 @@ import {FeedComment} from "./FeedComment";
 import {Media} from "../Media";
 import {Context} from "../../resolver/types/Context";
 import {subscribe} from "../../util/EventUtil";
-import {getArrayFromOverloadedRest} from "type-graphql/helpers/decorators";
 
 @Entity()
 @ObjectType()
