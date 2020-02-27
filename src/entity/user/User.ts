@@ -2,7 +2,8 @@ import {
     BeforeInsert,
     Column,
     CreateDateColumn,
-    Entity, getRepository,
+    Entity,
+    getRepository,
     ManyToOne,
     OneToMany,
     OneToOne,
@@ -15,7 +16,7 @@ import {PasswordResetToken} from "./PasswordResetToken";
 import {FeedPost} from "../social/FeedPost";
 import {FeedComment} from "../social/FeedComment";
 import {Media} from "../Media";
-import {ChallengeCompletion} from "../game-state/ChallengeCompletion";
+import {ChallengeCompletion, ChallengeGoalCompletionLevel} from "../game-state/ChallengeCompletion";
 import {ChallengeRejection} from "../game-state/ChallengeRejection";
 import {ChallengeReplacement} from "../game-state/ChallengeReplacement";
 import {Notification} from "./Notification";
@@ -176,6 +177,29 @@ export class User { //TODO split into profile data and user data
         let badgeScores = await Promise.all(
             badgeCompletions.map(async (bc) => {
                 let badge: Badge = await (await bc.seasonPlanChallenge).challenge || null; // TODO consider completion level for scoring?
+                let completionLevel = bc.challengeGoalCompletionLevel;
+                let multiplier;
+                switch (completionLevel) {
+                    case(ChallengeGoalCompletionLevel.MIN): {
+                        multiplier = 0.5;
+                        break;
+                    }
+                    case(ChallengeGoalCompletionLevel.MED): {
+                        multiplier = 0.65;
+                        break;
+                    }
+                    case(ChallengeGoalCompletionLevel.GOOD): {
+                        multiplier = 0.8;
+                        break;
+                    }
+                    case(ChallengeGoalCompletionLevel.MAX): {
+                        multiplier = 1;
+                        break;
+                    }
+                    default: {
+                        multiplier = 0.5;
+                    }
+                }
                 return badge.score;
             })).catch((err) => {
             console.error(err);
