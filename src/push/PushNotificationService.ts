@@ -41,7 +41,7 @@ export class PushNotificationService {
                 console.error(e)
             }
         }));
-        let tickets: ExpoPushTicket[] = ticketChunks.reduce((tickets, chunks) => tickets.concat(...chunks));
+        let tickets: ExpoPushTicket[] = ticketChunks.reduce((tickets, chunks) => tickets.concat(...chunks),[]);
         return messages.map((message, index) => {
             message.notification.ticketId = tickets[index].id;
             return message
