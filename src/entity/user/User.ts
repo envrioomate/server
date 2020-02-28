@@ -24,6 +24,7 @@ import {Subscription} from "./Subscription";
 import {AchievementSelection} from "../game-state/AchievementSelection";
 import {AchievementCompletion} from "../game-state/AchievementCompletion";
 import {Badge} from "../wiki-content/Badge";
+import {publish} from "../../util/EventUtil";
 
 export enum Role {
     User = 0,
@@ -178,7 +179,7 @@ export class User { //TODO split into profile data and user data
             badgeCompletions.map(async (bc) => {
                 let badge: Badge = await (await bc.seasonPlanChallenge).challenge || null; // TODO consider completion level for scoring?
                 let completionLevel = bc.challengeGoalCompletionLevel;
-                let multiplier;
+                let multiplier = 0.5;
                 switch (completionLevel) {
                     case(ChallengeGoalCompletionLevel.MIN): {
                         multiplier = 0.5;
@@ -209,6 +210,7 @@ export class User { //TODO split into profile data and user data
         const achievementScore = achievementScores.reduce(sum, 0);
         const badgeScore = badgeScores.reduce(sum, 0);
         this.score = achievementScore + badgeScore;
-        getRepository(User).save(this).catch(err => console.error(err));
+        let currentUser = await getRepository(User).save(this).catch(err => console.error(err));
+        publish(currentUser, "ScoreUpdated", true);
     }
 }
