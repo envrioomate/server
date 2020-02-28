@@ -140,4 +140,14 @@ export class Team {
             throw err
         });
     }
+
+    public async recalculateScore() {
+        let members = await Promise.all((await this.members).map(value => value.user))
+        this.score = members.reduce((acc, currentUser) => acc + currentUser.score, 0 )
+        let res = await getRepository(Team).save(this).catch(err => {
+            throw err
+        });
+        console.log(res);
+
+    }
 }

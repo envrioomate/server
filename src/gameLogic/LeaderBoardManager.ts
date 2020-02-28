@@ -19,23 +19,16 @@ export class LeaderBoardManager {
         @InjectRepository(Team) private readonly teamRepository: Repository<Team>) {
     }
 
-    @subscribe(ChallengeCompletion)
-    public static async addScoreToTeams(_challengeCompletion: ChallengeCompletion, action: string) {
-        console.log(_challengeCompletion);
-        let challengeCompletion: ChallengeCompletion = await Container.get(LeaderBoardManager).challengeCompletionRepository.findOne(_challengeCompletion.id);
-        console.log(challengeCompletion);
-
-        const owner = await challengeCompletion.owner;
-        const memberships = await owner.memberships;
-        const points = (await (await challengeCompletion.seasonPlanChallenge).challenge).score;
-        console.log(`ChallengeCompletion mod for ${owner.screenName}, action ${action}, score value ${points}`);
-
+    @subscribe(User)
+    public static async addScoreToTeams(user: User, action: string) {
+        if(action === "ScoreUpdated") return;
+        let memberships = await user.memberships;
         let teamScoresChanged = false;
         Promise.all(memberships.map(async membership => {
             if (membership.isActive) {
                 let team = await membership.team;
                 console.log(`Updating score on ${team.name}`);
-                action === 'add' ? await team.addScore(points) : await team.subScore(points);
+                await team.recalculateScore();
                 teamScoresChanged = true;
             }
         })).then(() => {
