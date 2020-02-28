@@ -158,7 +158,7 @@ export class User { //TODO split into profile data and user data
         return o;
     }
 
-    public async recalculateScore() {
+    public async recalculateScore(): Promise<User> {
         let achievementCompletions = (await this.achievementCompletions.catch((err) => {
             console.error(err);
             return null
@@ -212,5 +212,6 @@ export class User { //TODO split into profile data and user data
         this.score = achievementScore + badgeScore;
         let currentUser = await getRepository(User).save(this).catch(err => console.error(err));
         publish(currentUser, "ScoreUpdated", true);
+        return currentUser || null
     }
 }

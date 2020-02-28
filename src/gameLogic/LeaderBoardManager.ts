@@ -19,21 +19,15 @@ export class LeaderBoardManager {
         @InjectRepository(Team) private readonly teamRepository: Repository<Team>) {
     }
 
-    @subscribe(User)
-    public static async addScoreToTeams(user: User, action: string) {
-        if(action !== "ScoreUpdated") return;
-        user =  await Container.get(LeaderBoardManager).userRepository.findOne(user.id);
-        if(!user) {
-            console.error("User " + user + " not found!");
-            return
-        }
+    public static async addScoreToTeams(user: User, scoreDelta: number) {
+
         let memberships = await user.memberships;
         let teamScoresChanged = false;
         Promise.all(memberships.map(async membership => {
             if (membership.isActive) {
                 let team = await membership.team;
                 console.log(`Updating score on ${team.name}`);
-                await team.recalculateScore();
+                await team.addScore(scoreDelta);
                 teamScoresChanged = true;
             }
         })).then(() => {
@@ -47,16 +41,21 @@ export class LeaderBoardManager {
     @subscribe(ChallengeCompletion)
     public static async recalculateUserScoresFromBadges(_challengeCompletion: ChallengeCompletion, action: string) {
         let challengeCompletion: ChallengeCompletion = await Container.get(LeaderBoardManager).challengeCompletionRepository.findOne(_challengeCompletion.id);
-        const owner = await challengeCompletion.owner;
-        owner.recalculateScore()
+        let owner = await challengeCompletion.owner;
+        let oldScore = owner.score;
+        owner = await owner.recalculateScore()
+        let currentScore = owner.score;
+        LeaderBoardManager.addScoreToTeams(owner, currentScore - oldScore);
     }
 
     @subscribe(AchievementCompletion)
     public static async recalculateUserScoresFromAchievements(_achievementCompletion: AchievementCompletion, action: string) {
         let achievementCompletion: AchievementCompletion = await Container.get(LeaderBoardManager).achievementCompletionRepository.findOne(_achievementCompletion.id);
-        const owner = await achievementCompletion.owner;
-        owner.recalculateScore()
-
+        let owner = await achievementCompletion.owner;
+        let oldScore = owner.score;
+        owner = await owner.recalculateScore()
+        let currentScore = owner.score;
+        LeaderBoardManager.addScoreToTeams(owner, currentScore - oldScore);
     }
 
 
