@@ -138,18 +138,18 @@ export class TeamResolver {
 
         let team = await this.teamRepository.findOne(teamInput.id);
         if (!team) return Promise.reject(TeamResolverErrors.ERR_TEAM_DOES_NOT_EXIST);
+        if (!await this._hasTeamAuthority(user, team)) return Promise.reject(TeamResolverErrors.ERR_NO_TEAM_AUTHORITY);
 
         team.name = teamInput.teamName || team.name;
         team.description = teamInput.teamDescription || team.description;
         team.closed = teamInput.closed || false;
 
+        if (teamInput.mediaId) team = await this._setTeamAvatar(teamInput.mediaId, team);
+
         team = await this.teamRepository.save(team).catch((err) => {
             console.error(err);
             return Promise.reject(TeamResolverErrors.ERR_TEAM_DOES_NOT_EXIST)
         });
-
-        if (teamInput.mediaId) team = await this._setTeamAvatar(teamInput.mediaId, team);
-
 
         return this.teamRepository.findOne(team.id);
     }
@@ -249,7 +249,7 @@ export class TeamResolver {
         return deletedMembership;
     }
 
-//todo use a real search provider for this
+//todo use a real search provider for this -- edit 2020-03-02 nah, it's good
     @Query(returns => [Team])
     async searchTeamsByName(@Arg("teamName", type => String) teamName: String): Promise<Team[]> {
         return this.teamRepository.find({where: {name: Like(`%${teamName}%`)}})
