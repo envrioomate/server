@@ -194,6 +194,39 @@ export class TeamResolver {
         }
     }
 
+
+    @Mutation(returns => Membership)
+    async acceptInvite(@Arg("membershipId", type => Int) membershipId: number, @Ctx() {user}: Context) {
+
+        const membership = await this.memberRepository.findOne(membershipId);
+        if (!membership) return Promise.reject(TeamResolverErrors.ERR_NOT_TEAM_MEMBER);
+        if (membership.isAccepted) return Promise.reject(TeamResolverErrors.ERR_MEMBERSHIP_ALREADY_EXISTS);
+
+
+        let targetUser = await membership.user;
+        if (targetUser.id !== user.id) return Promise.reject(TeamResolverErrors.ERR_NOT_TEAM_MEMBER)
+
+        membership.isAccepted = true;
+        membership.isActive = true;
+
+        return this.memberRepository.save(membership)
+    }
+
+
+    @Mutation(returns => Membership)
+    async rejectInvite(@Arg("membershipId", type => Int) membershipId: number, @Ctx() {user}: Context) {
+
+        const membership = await this.memberRepository.findOne(membershipId);
+        if (!membership) return Promise.reject(TeamResolverErrors.ERR_NOT_TEAM_MEMBER);
+        if (membership.isAccepted) return Promise.reject(TeamResolverErrors.ERR_MEMBERSHIP_ALREADY_EXISTS);
+
+        let targetUser = await membership.user;
+        if (targetUser.id !== user.id) return Promise.reject(TeamResolverErrors.ERR_NOT_TEAM_MEMBER)
+
+        return this.memberRepository.delete(membership.id)
+    }
+
+
     @Mutation(returns => Membership)
     async modMember(@Arg("membershipId", type => Int) membershipId: number, @Ctx() {user}: Context) {
         const membership = await this.memberRepository.findOne(membershipId);
@@ -266,7 +299,11 @@ export class TeamResolver {
         if (!team) {
             return Promise.reject(TeamResolverErrors.ERR_TEAM_DOES_NOT_EXIST);
         }
-        return this._joinTeam(user, team)
+        let invite = await this._joinTeam(user, team)
+
+        invite.isAccepted = false;
+        invite = await this.memberRepository.save(invite);
+        return invite;
     }
 
 

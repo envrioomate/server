@@ -46,4 +46,8 @@ export class Membership {
     @Field(type => Boolean)
     @Column()
     isAdmin: Boolean = false;
+
+    @Field(type => Boolean)
+    @Column({default: true})
+    isAccepted: Boolean = true;
 }
