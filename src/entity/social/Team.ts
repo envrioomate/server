@@ -122,11 +122,11 @@ export class Team {
             return -1;
         }
         let rawQueryResult: any = await getRepository(Team).query(
-            "SELECT COUNT(*) AS inFront " +
-            "FROM `team` " +
-            "WHERE `team`.`score` > " +
-            "(SELECT `score` FROM `team` WHERE `team`.`id` = ?);",
-            [this.id] // eh
+            "SELECT COUNT(*) AS inFront" +
+            "FROM `team`" +
+            "WHERE `team`.`score` / (select count(*) as membercount from `membership` where `membership`.teamId = `team`.`id`) >" +
+            "(SELECT `score` / (select count(*) as membercount from `membership` where `membership`.teamId = ?) FROM `team` WHERE `team`.`id` = ?);",
+            [this.id, this.id] // eh
         );
         const place = Number(rawQueryResult[0].inFront) + 1; // the leader board should start at 1st instead of 0th place
         console.log({id: this.id, place, rawQueryResult});
