@@ -77,9 +77,9 @@ export class Team {
     score: number;
 
     @Field(type => Int)
-    scorePerUser: Promise<number> = async function () {
-        return this.score / await this.members.length
-    }();
+    scorePerUser: Promise<number> = (async () =>  {
+        return this.score / (await this.members).length
+    })();
 
     @Field(type => Int, {nullable: true})
     @Column({default: -1}) // if this value is -1 the team has no points at all;
