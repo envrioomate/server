@@ -114,6 +114,7 @@ export class Team {
     }
 
     public async updateTeamSize(action) {
+        console.log("updateTeamSize");
         let members = await this.members;
         members = members.filter(m => m.isActive);
         this.teamSize = teamSizeForSize(members.length);
@@ -139,6 +140,8 @@ export class Team {
     }
 
     public async reinitPosition() {
+        console.log("reinitPosition");
+
         this.place = await this.getPosition();
         return getRepository(Team).save(this).catch(err => {
             throw err
@@ -146,7 +149,15 @@ export class Team {
     }
 
     public async recalculateScore() {
-        let members = await Promise.all((await this.members).map(value => value.user))
+        console.log("recalculateScore");
+
+        console.log(this.id)
+        let memberships = await getRepository(Membership).find({where : {
+            team: this
+            }});
+        this.members = Promise.resolve(memberships);
+        let members = await Promise.all(memberships.map(value => value.user))
+        if (members.length == 0) return;
         this.score = members.reduce((acc, currentUser) => acc + currentUser.score, 0 )
         let res = await getRepository(Team).save(this).catch(err => {
             throw err
