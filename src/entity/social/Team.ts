@@ -125,13 +125,12 @@ export class Team {
             "SELECT COUNT(*) AS inFront " +
             "FROM `team` " +
             "WHERE `team`.`score` > " +
-            "(SELECT `score` FROM `team` WHERE `team`.`id` = ?) " +
-            "AND `team`.`teamSize` = ?;",
-            [this.id, this.teamSize.valueOf()] // eh
+            "(SELECT `score` FROM `team` WHERE `team`.`id` = ?);",
+            [this.id] // eh
         );
-        const place = Number(rawQueryResult[0].inFront) + 1;
+        const place = Number(rawQueryResult[0].inFront) + 1; // the leader board should start at 1st instead of 0th place
         console.log({id: this.id, place, rawQueryResult});
-        return place; // the leader board should start at 1st instead of 0th place
+        return place;
     }
 
     public async reinitPosition() {
