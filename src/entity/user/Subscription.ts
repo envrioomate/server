@@ -1,11 +1,11 @@
-import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {User} from "./User";
 import {Field, Int, ObjectType} from "type-graphql";
+import {Notification} from "./Notification";
 
 @Entity()
 @ObjectType()
 export class Subscription {
-
     @Field(type => Int, {nullable: true})
     @PrimaryGeneratedColumn()
     id: number;
@@ -17,5 +17,9 @@ export class Subscription {
 
     @Field(type => String, {nullable: true})
     @Column()
-    pushToken: string
+    pushToken: string;
+
+    @Field(type => [Notification], {nullable: true})
+    @OneToMany(type => Notification, n => n.subscription, {onDelete: "CASCADE", nullable: true})
+    notifications: Promise<Notification[]>;
 }
