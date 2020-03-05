@@ -15,7 +15,7 @@ export class Notification {
     @Field(type => User)
     user: Promise<User>;
 
-    @ManyToOne(type => Subscription, {eager: true})
+    @ManyToOne(type => Subscription, {eager: true, onDelete: "CASCADE"})
     @Field(type => Subscription)
     subscription: Subscription;
 
