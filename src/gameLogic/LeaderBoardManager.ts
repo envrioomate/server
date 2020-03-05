@@ -57,7 +57,6 @@ export class LeaderBoardManager {
         );
     }
 
-
     @subscribe(ChallengeCompletion)
     public static async recalculateUserScoresFromBadges(_challengeCompletion: ChallengeCompletion, action: string) {
         let challengeCompletion: ChallengeCompletion = await Container.get(LeaderBoardManager).challengeCompletionRepository.findOne(_challengeCompletion.id);
@@ -88,6 +87,7 @@ export class LeaderBoardManager {
 
     public async recalculateLeaderBoardPositions() {
         const teams = await this.teamRepository.find();
+        await Promise.all(teams.map(team => team.recalculateScore()));
         return teams.map(team => team.reinitPosition());
     }
 }
