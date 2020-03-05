@@ -38,6 +38,26 @@ export class LeaderBoardManager {
         );
     }
 
+    public static async teamScoreFromUsers(user: User) {
+
+        let memberships = await user.memberships;
+        let teamScoresChanged = false;
+        Promise.all(memberships.map(async membership => {
+            if (membership.isActive) {
+                let team = await membership.team;
+                console.log(`Updating score on ${team.name}`);
+                await team.recalculateScore();
+                teamScoresChanged = true;
+            }
+        })).then(() => {
+                if (teamScoresChanged) Container.get(LeaderBoardManager).recalculateLeaderBoardPositions().catch(err => {
+                    throw err;
+                })
+            }
+        );
+    }
+
+
     @subscribe(ChallengeCompletion)
     public static async recalculateUserScoresFromBadges(_challengeCompletion: ChallengeCompletion, action: string) {
         let challengeCompletion: ChallengeCompletion = await Container.get(LeaderBoardManager).challengeCompletionRepository.findOne(_challengeCompletion.id);
@@ -45,7 +65,7 @@ export class LeaderBoardManager {
         let oldScore = owner.score;
         owner = await owner.recalculateScore()
         let currentScore = owner.score;
-        LeaderBoardManager.addScoreToTeams(owner, currentScore - oldScore);
+        LeaderBoardManager.teamScoreFromUsers(owner);
     }
 
     @subscribe(AchievementCompletion)
@@ -55,7 +75,7 @@ export class LeaderBoardManager {
         let oldScore = owner.score;
         owner = await owner.recalculateScore()
         let currentScore = owner.score;
-        LeaderBoardManager.addScoreToTeams(owner, currentScore - oldScore);
+        LeaderBoardManager.teamScoreFromUsers(owner);
     }
 
 
