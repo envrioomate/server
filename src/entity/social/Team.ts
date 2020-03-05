@@ -78,7 +78,7 @@ export class Team {
 
     @Field(type => Int)
     scorePerUser: Promise<number> = (async () =>  {
-        return this.score / (await this.members).length
+        return (this.score / (await this.members).length) || 0
     })();
 
     @Field(type => Int, {nullable: true})
