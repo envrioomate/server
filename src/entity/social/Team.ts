@@ -1,10 +1,8 @@
 import {BeforeInsert, Column, Entity, getRepository, ManyToOne, OneToMany, PrimaryGeneratedColumn,} from "typeorm";
 import {Membership} from "./Membership";
-import {Field, Int, ObjectType, registerEnumType} from "type-graphql";
+import {Field, Float, Int, ObjectType, registerEnumType} from "type-graphql";
 import {Media} from "../Media";
 import {generate} from "shortid";
-import {Container} from "typedi";
-import {LeaderBoardManager} from "../../gameLogic/LeaderBoardManager";
 
 
 export enum TeamSize {
@@ -18,16 +16,16 @@ export const teamSizeForSize = (size) => {
             teamSize = TeamSize.SOLO;
             break;
         case (size <= 2):
-            teamSize =  TeamSize.DUO;
+            teamSize = TeamSize.DUO;
             break;
         case (size <= 5):
-            teamSize =  TeamSize.SMALL;
+            teamSize = TeamSize.SMALL;
             break;
         case (size <= 10):
             teamSize = TeamSize.LARGE;
             break;
         default:
-            teamSize =  TeamSize.HUGE;
+            teamSize = TeamSize.HUGE;
     }
     return teamSize
 };
@@ -76,11 +74,6 @@ export class Team {
     @Column({default: 0})
     score: number;
 
-    @Field(type => Int)
-    scorePerUser: Promise<number> = (async () =>  {
-        return (this.score / (await this.members).length) || 0
-    })();
-
     @Field(type => Int, {nullable: true})
     @Column({default: -1}) // if this value is -1 the team has no points at all;
     place: number;
@@ -92,6 +85,14 @@ export class Team {
     @BeforeInsert()
     setInviteIdIfNoneExists() {
         this.inviteId = this.inviteId || generate();
+    }
+
+    @Field(type => Float)
+    public async scorePerUser(): Promise<number>{
+        let teamScore = this.score;
+        let membercount = (await this.members).length;
+        let scorePerUser = teamScore / membercount;
+        return scorePerUser;
     }
 
     public async addScore(points: number) {
@@ -152,13 +153,15 @@ export class Team {
         console.log("recalculateScore");
 
         console.log(this.id)
-        let memberships = await getRepository(Membership).find({where : {
-            team: this
-            }});
+        let memberships = await getRepository(Membership).find({
+            where: {
+                team: this
+            }
+        });
         this.members = Promise.resolve(memberships);
         let members = await Promise.all(memberships.map(value => value.user))
         if (members.length == 0) return;
-        this.score = members.reduce((acc, currentUser) => acc + currentUser.score, 0 )
+        this.score = members.reduce((acc, currentUser) => acc + currentUser.score, 0)
         let res = await getRepository(Team).save(this).catch(err => {
             throw err
         });
