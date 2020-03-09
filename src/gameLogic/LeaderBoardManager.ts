@@ -64,7 +64,7 @@ export class LeaderBoardManager {
         let oldScore = owner.score;
         owner = await owner.recalculateScore()
         let currentScore = owner.score;
-        LeaderBoardManager.teamScoreFromUsers(owner);
+        LeaderBoardManager.teamScoreFromUsers(owner).catch(err => console.error(err));
     }
 
     @subscribe(AchievementCompletion)
@@ -74,15 +74,16 @@ export class LeaderBoardManager {
         let oldScore = owner.score;
         owner = await owner.recalculateScore()
         let currentScore = owner.score;
-        LeaderBoardManager.teamScoreFromUsers(owner);
+        LeaderBoardManager.teamScoreFromUsers(owner).catch(err => console.error(err));
     }
 
-
     @subscribe(Membership)
-    public static async updateTeamSize(membership: Membership, action: string) {
-        let team = await (await Container.get(LeaderBoardManager).membershipRepository.findOne(membership.id)).team;
+    public static async updateTeamSize(_membership: Membership, action: string) {
+        let membership = await Container.get(LeaderBoardManager).membershipRepository.findOne(_membership.id);
+        let team = await membership.team;
         console.log(`Updating team size on ${team.name}`);
         team.updateTeamSize(action).catch(err => console.error(err));
+        team.recalculateScore().catch(err => console.error(err));
     }
 
     public async recalculateLeaderBoardPositions() {
