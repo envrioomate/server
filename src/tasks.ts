@@ -40,27 +40,6 @@ export class Tasks {
                 //TODO push challenge reminder
         });
 
-        // notify thursday
-        let thursdayTimer = new schedule.RecurrenceRule();
-        thursdayTimer.dayOfWeek = [1];
-        thursdayTimer.hour = 17;
-        thursdayTimer.minute = 0;
-
-        this.thursdayJob = schedule.scheduleJob(thursdayTimer, () => {
-            //TODO push challenge reminder
-
-        });
-
-        // notify sunday
-        let sundayTimer = new schedule.RecurrenceRule();
-        sundayTimer.dayOfWeek = [1];
-        sundayTimer.hour = 17;
-        sundayTimer.minute = 0;
-
-        this.sundayJob = schedule.scheduleJob(sundayTimer, () => {
-            //TODO push challenge reminder
-
-        });
 
         if (process.env.NODE_ENV !== "production") {
             const defaultAdmin = new User();
@@ -111,8 +90,18 @@ export class Tasks {
         sendmail({
             from: 'no-reply@k4all.dastreibendewerk.de',
             to: token.user.userName,
-            subject: 'Enviroommate Passwort zurücksetzen',
-            text: 'https://k4all.dastreibendewerk.de/app/api/resetPassword?resettoken=' + token.resetToken,
+            subject: 'Klimaschutz For All App Passwort zurücksetzen',
+            text: `
+            Hallo, \n 
+            \n
+            hier kannst Du dein Passwort für die Klimaschutz For All App zurücksetzen: \n
+            https://k4all.dastreibendewerk.de/app/resetPassword?resettoken=${token.resetToken} \n
+            \n
+            - Das Klimaschutz For All Team
+            \n
+            \n
+            Diese Nachricht wurde automatisch erstellt. Um uns zu erreichen besuch bitte unsere Website unter https://www.klimaschutz4all.com/            
+            `,
         }, function(err, reply) {
             console.log(err && err.stack);
             console.log(reply);

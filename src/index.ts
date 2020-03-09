@@ -23,6 +23,7 @@ import * as redis from "redis";
 import {RedisClient} from "redis";
 import {LeaderBoardManager} from "./gameLogic/LeaderBoardManager";
 import {PushNotificationService} from "./push/PushNotificationService";
+import {ResetPasswordController} from "./controller/ResetPasswordController";
 
 let config = require("../config.json");
 
@@ -73,6 +74,7 @@ TypeORM.createConnection().then(async connection => {
     app.use(expressValidator());
 
     try {
+        app.use('/resetPassword', ResetPasswordController)
         app.use('/api/', ApiLandingContoller);
         app.use('/api/auth', passport.authenticate('jwt', {session: false}), ApiContoller);
         app.use('/api/sync', WikiSyncController);
