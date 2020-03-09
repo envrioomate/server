@@ -18,8 +18,7 @@ export class Tasks {
 
     public syncWithWikiJob;
 
-    public constructor(
-    ) {
+    public constructor() {
 
         // db updates
 
@@ -37,7 +36,7 @@ export class Tasks {
         mondayTimer.hour = 17;
         mondayTimer.minute = 0;
         this.mondayJob = schedule.scheduleJob(mondayTimer, () => {
-                //TODO push challenge reminder
+            //TODO push challenge reminder
         });
 
 
@@ -76,7 +75,7 @@ export class Tasks {
     public static async sendPasswordReset(userId) {
 
         let token = await getRepository(PasswordResetToken).findOne({user: userId});
-        if(!token) return;
+        if (!token) return;
         const sendmail = require('sendmail')({
             logger: {
                 debug: console.log,
@@ -91,18 +90,17 @@ export class Tasks {
             from: 'no-reply@k4all.dastreibendewerk.de',
             to: token.user.userName,
             subject: 'Klimaschutz For All App Passwort zurücksetzen',
-            text: `
-            Hallo, \n 
-            \n
-            hier kannst Du dein Passwort für die Klimaschutz For All App zurücksetzen: \n
-            https://k4all.dastreibendewerk.de/app/resetPassword?resettoken=${token.resetToken} \n
-            \n
-            - Das Klimaschutz For All Team
-            \n
-            \n
-            Diese Nachricht wurde automatisch erstellt. Um uns zu erreichen besuch bitte unsere Website unter https://www.klimaschutz4all.com/            
-            `,
-        }, function(err, reply) {
+            text:
+                `Hallo, 
+ 
+hier kannst Du dein Passwort für die Klimaschutz For All App zurücksetzen: 
+https://k4all.dastreibendewerk.de/app/resetPassword?resettoken=${token.resetToken} 
+                  
+- Das Klimaschutz For All Team
+\n
+Diese Nachricht wurde automatisch erstellt. Um uns zu erreichen besuch bitte unsere Website unter https://www.klimaschutz4all.com/            
+`, //TODO figure out where to store mail templates
+        }, function (err, reply) {
             console.log(err && err.stack);
             console.log(reply);
         });
