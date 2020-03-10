@@ -112,7 +112,7 @@ router.post('/register', async (request: Request, response: Response, done: Func
             await getRepository(User).insert(newUser);
             let u = await getRepository(User).findOne({where:{userName: newUser.userName}});
 
-            publish(newUser, "create");
+            publish(u, "create");
 
             response.json(newUser.transfer(true));
             done();
