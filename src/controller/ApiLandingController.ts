@@ -7,6 +7,7 @@ import {getRepository} from "typeorm";
 import {Membership} from "../entity/social/Membership";
 import {PasswordResetToken} from "../entity/user/PasswordResetToken";
 import {Tasks} from "../tasks";
+import {publish} from "../util/EventUtil";
 
 let router = Router();
 const config = require("../../config.json");
@@ -111,7 +112,7 @@ router.post('/register', async (request: Request, response: Response, done: Func
             await getRepository(User).insert(newUser);
             let u = await getRepository(User).findOne({where:{userName: newUser.userName}});
 
-            publish(user, "create");
+            publish(newUser, "create");
 
             response.json(newUser.transfer(true));
             done();
