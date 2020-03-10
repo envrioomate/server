@@ -24,12 +24,13 @@ import {RedisClient} from "redis";
 import {LeaderBoardManager} from "./gameLogic/LeaderBoardManager";
 import {PushNotificationService} from "./push/PushNotificationService";
 import {ResetPasswordController} from "./controller/ResetPasswordController";
+import {UserScoreManager} from "./gameLogic/UserScoreManager";
 
 let config = require("../config.json");
 
 let client: RedisClient = redis.createClient({db: config.redisDb});
 Container.set("redis", client);
-
+Container.set("GameProgressionManager", GameProgressionManager);
 TypeORM.useContainer(Container)
 TypeGraphQL.useContainer(Container);
 
@@ -39,6 +40,7 @@ TypeORM.createConnection().then(async connection => {
     const gameProgressionManager = Container.get(GameProgressionManager);
     const leadboardManager = Container.get(LeaderBoardManager);
     const pushNotificationService = Container.get(PushNotificationService);
+    const userScoreManager = Container.get(UserScoreManager);
     // create express app
     const app = express();
 

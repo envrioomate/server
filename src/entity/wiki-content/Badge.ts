@@ -88,7 +88,7 @@ export class Badge {
     name: string;
 
     @Field(type => String)
-    @Column()
+    @Column({default: ""})
     title: string;
 
     @Field(type => String)

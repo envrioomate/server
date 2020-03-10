@@ -3,6 +3,7 @@ import {NextFunction, Request, Response, Router} from "express";
 
 import {User} from "../entity/user/User";
 import * as passport from "passport";
+import {publish} from "../util/EventUtil";
 
 
 let router = Router();
@@ -60,6 +61,7 @@ async function postRegister(request: Request, response: Response, done: NextFunc
 
             let user = await getRepository(User).insert(newUser);
             if(user){
+                publish(user, "created");
                 response.sendStatus(201);
             } else {
                 response.sendStatus(400);
