@@ -7,6 +7,7 @@ import {getRepository} from "typeorm";
 import {Membership} from "../entity/social/Membership";
 import {PasswordResetToken} from "../entity/user/PasswordResetToken";
 import {Tasks} from "../tasks";
+import {publish} from "../util/EventUtil";
 
 let router = Router();
 const config = require("../../config.json");
