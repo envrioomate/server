@@ -5,6 +5,12 @@ import {Repository} from "typeorm";
 import {UserInput} from "./types/UserInput";
 import {Media} from "../entity/Media";
 import {Context} from "./types/Context";
+import {Team} from "../entity/social/Team";
+import {Container} from "typedi";
+import {LeaderBoardManager} from "../gameLogic/LeaderBoardManager";
+import {UserScoreManager} from "../gameLogic/UserScoreManager";
+import {AchievementSelection} from "../entity/game-state/AchievementSelection";
+import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 
 @Resolver()
 export class UserResolver {
@@ -103,7 +109,15 @@ export class UserResolver {
         }
 
     }
+    @Authorized("ADMIN")
+    @Mutation(returns => [AchievementCompletion])
+    async checkStartingAchievement() {
+        return Container.get(UserScoreManager).checkStartingAchievement()
+    }
 }
+
+
+
 
 /*
 const UPDATE_PROFILE = gql`
