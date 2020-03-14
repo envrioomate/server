@@ -37,7 +37,7 @@ export class TeamResolver {
     }
 
     private async _joinTeam(user: User, team: Team): Promise<Membership> {
-        const currentMemberships = await team.members;
+        const currentMemberships = (await team.members).filter(m => m.isAccepted === true);
         const currentMembers = await Promise.all(await currentMemberships.map(async m => {
             return (await m.user).id
         }));

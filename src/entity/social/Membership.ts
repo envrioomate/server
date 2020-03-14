@@ -19,7 +19,7 @@ import {Field, Int, ObjectType} from "type-graphql";
 @Entity()
 export class Membership {
 
-    @Field(type => Int)
+    @Field(type => Int, {nullable: true})
     @PrimaryGeneratedColumn()
     id: number;
 
