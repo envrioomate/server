@@ -200,8 +200,6 @@ export class TeamResolver {
 
         const membership = await this.memberRepository.findOne(membershipId);
         if (!membership) return Promise.reject(TeamResolverErrors.ERR_NOT_TEAM_MEMBER);
-        if (membership.isAccepted) return Promise.reject(TeamResolverErrors.ERR_MEMBERSHIP_ALREADY_EXISTS);
-        if (!membership.isActive) return  Promise.reject(TeamResolverErrors.ERR_MEMBERSHIP_ALREADY_EXISTS);
 
 
         let targetUser = await membership.user;
