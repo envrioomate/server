@@ -90,7 +90,7 @@ export class Team {
     @Field(type => Float)
     public async scorePerUser(): Promise<number>{
         let teamScore = this.score;
-        let membercount = (await this.members).length;
+        let membercount = (await this.members).filter(m => m.isActive && m.isAccepted).length;
         let scorePerUser = teamScore / membercount;
         return scorePerUser;
     }
