@@ -84,7 +84,11 @@ export class Tasks {
                 error: console.error
             },
             silent: false,
-            dkim: false,
+            dkim: {
+                privateKey: process.env.DKIM_PRIVATE_KEY || require("fs").readFileSync("/opt/dkim.pem"),
+                keySelector: "k4all",
+                domainName: "k4all.dastreibendewerk.de"
+            },
         })
         sendmail({
             from: 'no-reply@k4all.dastreibendewerk.de',
