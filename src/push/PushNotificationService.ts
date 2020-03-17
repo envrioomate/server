@@ -92,7 +92,7 @@ export class PushNotificationService {
                 title: 'Hello',
                 icon: 'md-star',
                 body: 'This is a test notification',
-                path: 'App/ProfileTab'
+                path: 'App/NotificationsTab'
             },
         };
         await this.expo.sendPushNotificationsAsync([message])
