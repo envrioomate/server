@@ -17,7 +17,10 @@ import {error} from "util";
 import {Achievement} from "../entity/wiki-content/Achievement";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import {AchievementCompletion, AchievementCompletionType} from "../entity/game-state/AchievementCompletion";
-import moment = require("moment");
+
+import * as moment from 'moment';
+import 'moment/locale/de';
+moment.locale('de');
 
 const {promisify} = require('util');
 @Service()
@@ -25,7 +28,7 @@ const {promisify} = require('util');
 export class GameProgressionManager implements EntitySubscriberInterface{
 
     private redisClient: RedisClient = Container.get("redis");
-    private getRedisAsync: Function;
+    private readonly getRedisAsync: Function;
     private seasonUseRedisTTL = true;
     private seasonPlanUseRedisTTL = true;
 
@@ -282,7 +285,6 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             return lastCompletion
         }
 
-
         let completion = new AchievementCompletion();
         completion.owner = Promise.resolve(user);
         completion.achievement = Promise.resolve(await achievementSelection.achievement);
@@ -293,4 +295,44 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         publish(completion, "add", true);
         return completion;
     }
+
+    public async checkFailedAchievement(achievementSelection: AchievementSelection): Promise<AchievementCompletion> {
+        let now = moment();
+
+        if(!achievementSelection.timeOutDate) {
+            achievementSelection.timeOutDate = await achievementSelection.calcTimeOutDate();
+            await this.achievementSelectionRepository.save(achievementSelection)
+        }
+
+        if((await achievementSelection.achievementCompletions).length > 0) {
+            return;
+        }
+
+        let timeOutDate = moment(achievementSelection.timeOutDate);
+        if(moment.max(timeOutDate, now) === now) {
+            let completion = new AchievementCompletion();
+            completion.owner = Promise.resolve(await achievementSelection.owner);
+            completion.achievement = Promise.resolve(await achievementSelection.achievement);
+            completion.achievementSelection = Promise.resolve(achievementSelection);
+            completion.achievementCompletionType = AchievementCompletionType.TIMED_OUT;
+            return await this.achievementCompletionRepository.save(completion);
+        }
+        return null;
+    }
+
+
+
+    public async updateAchievements(): Promise<AchievementCompletion[]> {
+        let uncompletedAchievementSelections = await this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
+        let result = await Promise.all((uncompletedAchievementSelections.map(selection => this.checkFailedAchievement(selection))).filter(v => v !== null));
+        console.log({result: await result})
+        return result.filter(v => v !== undefined && v!== null);
+    }
+
+    public async remindAchievements(): Promise<AchievementCompletion[]> {
+        let uncompletedAchievementSelections = this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
+        return Promise.reject("Not implemented!");
+
+    }
+
 }

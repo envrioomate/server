@@ -22,7 +22,7 @@ import {ChallengeReplacement} from "../game-state/ChallengeReplacement";
 import {Notification} from "./Notification";
 import {Subscription} from "./Subscription";
 import {AchievementSelection} from "../game-state/AchievementSelection";
-import {AchievementCompletion} from "../game-state/AchievementCompletion";
+import {AchievementCompletion, AchievementCompletionType} from "../game-state/AchievementCompletion";
 import {Badge} from "../wiki-content/Badge";
 import {publish} from "../../util/EventUtil";
 
@@ -165,7 +165,7 @@ export class User { //TODO split into profile data and user data
         }));
         let achievementScores = await Promise.all(
             achievementCompletions.map(async (ac) => {
-                return (await ac.achievement).score
+                return ac.achievementCompletionType === AchievementCompletionType.COMPLETED ? (await ac.achievement).score : 0;
             })).catch((err) => {
             console.error(err);
             return null

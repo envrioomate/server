@@ -1,4 +1,4 @@
-import {Arg, Ctx, Int, Mutation, Query, Resolver} from "type-graphql";
+import {Arg, Authorized, Ctx, Int, Mutation, Query, Resolver} from "type-graphql";
 import {Season} from "../entity/game-state/Season";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
 import {GameProgressionManager} from "../gameLogic/GameProgressionManager";
@@ -65,6 +65,23 @@ export class GameStateResolver {
     @Mutation(returns => ChallengeCompletion, {nullable: true})
     async uncompleteChallenge(@Ctx() {user}, @Arg("challengeCompletionId", type => Int) challengeCompletionId: number): Promise<ChallengeCompletion> {
         return this.mgmr.unCompleteChallenge(user, challengeCompletionId)
+    }
+
+
+    @Authorized("ADMIN")
+    @Mutation( returns => [AchievementCompletion], {nullable: true})
+    async updateAllAchievements(@Ctx() {user}): Promise<AchievementCompletion[]> {
+
+        return this.mgmr.updateAchievements()
+
+    }
+
+    @Authorized("ADMIN")
+    @Mutation( returns => [AchievementCompletion], {nullable: true})
+    async remindAchievements(@Ctx() {user}): Promise<AchievementCompletion[]> {
+
+        return this.mgmr.remindAchievements();
+
     }
 
 }

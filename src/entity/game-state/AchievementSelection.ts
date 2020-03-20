@@ -1,4 +1,6 @@
 import {
+    BeforeInsert,
+    Column,
     CreateDateColumn,
     Entity,
     ManyToMany,
@@ -11,6 +13,10 @@ import {Field, Int, ObjectType} from "type-graphql";
 import {User} from "../user/User";
 import {Achievement} from "../wiki-content/Achievement";
 import {AchievementCompletion} from "./AchievementCompletion";
+
+import * as moment from 'moment';
+import 'moment/locale/de';
+moment.locale('de');
 
 
 @Entity()
@@ -38,6 +44,20 @@ export class AchievementSelection {
 
     @Field(type => [AchievementCompletion], {nullable: true})
     @OneToMany(type => AchievementCompletion, as => as.achievementSelection, {nullable: true})
-    achievementCompletions?: Promise<AchievementCompletion[]> ;
+    achievementCompletions?: Promise<AchievementCompletion[]>;
+
+    @Field(type => Date, {nullable: true})
+    @Column({nullable: true})
+    timeOutDate: Date;
+
+    @BeforeInsert()
+    public async calcTimeOutDate() {
+        let _achievement = await this.achievement;
+        let timeOutDate = moment(this.createdAt);
+        timeOutDate.add(_achievement.weeks, 'week');
+        this.timeOutDate = timeOutDate.toDate();
+        return this.timeOutDate;
+    }
+    
 
 }

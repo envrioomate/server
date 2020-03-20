@@ -8,15 +8,17 @@ import {PasswordResetToken} from "./entity/user/PasswordResetToken";
 import {WikiClient} from "./wikiData/WikiClient";
 import {Container, Service} from "typedi";
 import {Role, User} from "./entity/user/User";
+import {GameProgressionManager} from "./gameLogic/GameProgressionManager";
 
 @Service()
 export class Tasks {
 
     public mondayJob;
-    public thursdayJob;
-    public sundayJob;
 
+    public seasonJob;
     public syncWithWikiJob;
+    public remindAchievementsJob;
+    public updateAchievementsJob;
 
     public constructor() {
 
@@ -39,6 +41,32 @@ export class Tasks {
             //TODO push challenge reminder
         });
 
+        let seasonTimer = new schedule.RecurrenceRule();
+        seasonTimer.hour = [1];
+        seasonTimer.minute = 0;
+        this.seasonJob = schedule.scheduleJob(seasonTimer, () => {
+            Container.get(GameProgressionManager).setUpCurrentSeason().catch(e => console.error(e));
+        });
+
+        let remindAchievementsTimer = new schedule.RecurrenceRule();
+        mondayTimer.dayOfWeek = [3];
+        remindAchievementsTimer.hour = [18];
+        remindAchievementsTimer.minute = 0;
+        this.remindAchievementsJob = schedule.scheduleJob(remindAchievementsTimer, () => {
+            //TODO notify about achievments
+            Container.get(GameProgressionManager).remindAchievements().catch(e => console.error(e));
+
+        });
+
+        let updateAchievementsTimer = new schedule.RecurrenceRule();
+        mondayTimer.dayOfWeek = [3];
+        updateAchievementsTimer.hour = [18];
+        updateAchievementsTimer.minute = 0;
+        this.updateAchievementsJob = schedule.scheduleJob(updateAchievementsTimer, () => {
+            //TODO update achievments
+            Container.get(GameProgressionManager).updateAchievements().catch(e => console.error(e));
+
+        });
 
         if (process.env.NODE_ENV !== "production") {
             const defaultAdmin = new User();
@@ -110,3 +138,4 @@ Diese Nachricht wurde automatisch erstellt. Um uns zu erreichen besuch bitte uns
         });
     }
 }
+
