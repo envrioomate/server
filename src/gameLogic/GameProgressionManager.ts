@@ -320,19 +320,11 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         return null;
     }
 
-
-
     public async updateAchievements(): Promise<AchievementCompletion[]> {
         let uncompletedAchievementSelections = await this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
         let result = await Promise.all((uncompletedAchievementSelections.map(selection => this.checkFailedAchievement(selection))).filter(v => v !== null));
         console.log({result: await result})
         return result.filter(v => v !== undefined && v!== null);
-    }
-
-    public async remindAchievements(): Promise<AchievementCompletion[]> {
-        let uncompletedAchievementSelections = this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
-        return Promise.reject("Not implemented!");
-
     }
 
 }

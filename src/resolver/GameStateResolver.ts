@@ -9,6 +9,9 @@ import {IUserChallenge} from "../entity/game-state/IUserChallenge";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 import {User} from "../entity/user/User";
+import {PushNotificationService} from "../push/PushNotificationService";
+import {Notification} from "../entity/user/Notification";
+
 
 @Resolver()
 export class GameStateResolver {
@@ -77,10 +80,10 @@ export class GameStateResolver {
     }
 
     @Authorized("ADMIN")
-    @Mutation( returns => [AchievementCompletion], {nullable: true})
-    async remindAchievements(@Ctx() {user}): Promise<AchievementCompletion[]> {
+    @Mutation( returns => [Notification], {nullable: true})
+    async remindAchievements(@Ctx() {user}): Promise<Notification[]> {
 
-        return this.mgmr.remindAchievements();
+        return Container.get(PushNotificationService).remindAchievements();
 
     }
 

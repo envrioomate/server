@@ -6,7 +6,7 @@ import {
     ManyToMany,
     ManyToOne,
     OneToMany,
-    PrimaryGeneratedColumn,
+    PrimaryGeneratedColumn, RelationCount,
     UpdateDateColumn
 } from "typeorm";
 import {Field, Int, ObjectType} from "type-graphql";

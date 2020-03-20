@@ -9,6 +9,7 @@ import {WikiClient} from "./wikiData/WikiClient";
 import {Container, Service} from "typedi";
 import {Role, User} from "./entity/user/User";
 import {GameProgressionManager} from "./gameLogic/GameProgressionManager";
+import {PushNotificationService} from "./push/PushNotificationService";
 
 @Service()
 export class Tasks {
@@ -54,7 +55,7 @@ export class Tasks {
         remindAchievementsTimer.minute = 0;
         this.remindAchievementsJob = schedule.scheduleJob(remindAchievementsTimer, () => {
             //TODO notify about achievments
-            Container.get(GameProgressionManager).remindAchievements().catch(e => console.error(e));
+            Container.get(PushNotificationService).remindAchievements().catch(e => console.error(e));
 
         });
 

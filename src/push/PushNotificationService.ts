@@ -1,7 +1,7 @@
 import Expo, {ExpoPushMessage, ExpoPushTicket} from 'expo-server-sdk';
 import {Subscription} from "../entity/user/Subscription";
 import {InjectRepository} from "typeorm-typedi-extensions";
-import {getRepository, Repository} from "typeorm";
+import {getRepository, Not, Repository} from "typeorm";
 import {Notification} from "../entity/user/Notification";
 import {User} from "../entity/user/User";
 import * as schedule from 'node-schedule';
@@ -11,6 +11,8 @@ import {FeedComment} from "../entity/social/FeedComment";
 import {Container, Service} from "typedi";
 import {FeedPost} from "../entity/social/FeedPost";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
+import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
+import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 
 @Service()
 export class PushNotificationService {
@@ -20,6 +22,7 @@ export class PushNotificationService {
 
     constructor(
         @InjectRepository(Notification) private readonly notificationRepository: Repository<Notification>,
+        @InjectRepository(AchievementSelection) private readonly achievementSelectionRepository: Repository<AchievementSelection>,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {
         //collect unsent messages for 5 min and then push all of them
@@ -209,21 +212,50 @@ export class PushNotificationService {
         let currentSubscriptions = await getRepository(Subscription).find().catch(err => console.error(err)) || null;
 
         let pendingNotifications = await Promise.all(currentSubscriptions.map(async value => {
-            let notification = new Notification();
-            notification.user = Promise.resolve(await value.user);
-            notification.subscription = value;
-            notification.status = "pending";
-            notification.title = "Neues Thema";
-            notification.body = thema.title || thema.name;
-            notification.icon = "md-information-circle-outline";
-            notification.path = "App/BadgeTab"
-            return notification;
+            return PushNotificationService._buildNotification({
+                recipient: await value.user,
+                title: `Neues Thema!`,
+                body: thema.title || thema.name,
+                path: "App/BadgeTab"
+            });
         })) || null;
 
-        let notifications = await getRepository(Notification).save(pendingNotifications).catch(err => console.error(err));
-        console.log(notifications);
         return;
 
     }
 
+    public async remindAchievements(): Promise<Notification[]> {
+        let uncompletedAchievementSelections = await this.achievementSelectionRepository.find();
+        let ac = await Promise.all(uncompletedAchievementSelections.map(async as => { return {as, ac: await as.achievementCompletions}}));
+        return Promise.all(ac
+            .filter(value => value.ac.length === 0 ? value.as : false)
+            .map(value => value.as)
+            .map(async achievementSelection => {
+                return PushNotificationService._buildNotification({
+                    recipient: await achievementSelection.owner,
+                    title: `Eine Aktivität wartet auf Dich!`,
+                    body: ``,
+                    path: "/App/BadgeTab/Achievements"
+                })
+            }))
+        ;
+    }
+
+
+    private static async _buildNotification({recipient, title, body, icon = "md-information-circle-outline", path = "App/NotificationsTab"}): Promise<Notification> {
+        let subscription = await recipient.subscription;
+        if (subscription) {
+            let notification = new Notification();
+            notification.user = Promise.resolve(recipient);
+            notification.subscription = subscription;
+            notification.status = "pending";
+            notification.title = title ;
+            notification.body = body;
+            notification.icon = icon;
+            notification.path = path;
+            return getRepository(Notification).save(notification);
+        }
+
+        return Promise.reject("achievementSelection owner not subscribed to notifications.");
+    }
 }
