@@ -55,9 +55,10 @@ export class PushNotificationService {
         //find all notifications that are not yet being sent
         let currentPendingNotifications = await this.notificationRepository.find({where: {status: 'pending'}});
         //lock them to this worker process
-        currentPendingNotifications.forEach(async (notification) => {
+        currentPendingNotifications.forEach((notification) => {
             notification.status = "sent";
         });
+
         currentPendingNotifications = await this.notificationRepository.save(currentPendingNotifications);
         //generate ExpoPushMessages from Notification entities
         let messages = await Promise.all(currentPendingNotifications.map(async (notification) => {
@@ -201,7 +202,6 @@ export class PushNotificationService {
         let notifications = await getRepository(Notification).save(pendingNotifications).catch(err => console.error(err));
         console.log(notifications);
         return;
-
     }
 
     @subscribe(SeasonPlan)
@@ -231,16 +231,16 @@ export class PushNotificationService {
             .filter(value => value.ac.length === 0 ? value.as : false)
             .map(value => value.as)
             .map(async achievementSelection => {
+                const achievement = await achievementSelection.achievement;
                 return PushNotificationService._buildNotification({
                     recipient: await achievementSelection.owner,
                     title: `Eine Aktivität wartet auf Dich!`,
-                    body: ``,
+                    body: `Deine Aktivität "${achievement.title || achievement.name}" wartet auf Dich!`,
                     path: "/App/BadgeTab/Achievements"
                 })
-            }))
+            }).filter(value => value !== null))
         ;
     }
-
 
     private static async _buildNotification({recipient, title, body, icon = "md-information-circle-outline", path = "App/NotificationsTab"}): Promise<Notification> {
         let subscription = await recipient.subscription;
@@ -256,6 +256,6 @@ export class PushNotificationService {
             return getRepository(Notification).save(notification);
         }
 
-        return Promise.reject("achievementSelection owner not subscribed to notifications.");
+        return null;
     }
 }

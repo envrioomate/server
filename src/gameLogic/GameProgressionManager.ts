@@ -327,4 +327,14 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         return result.filter(v => v !== undefined && v!== null);
     }
 
+    public async updateAchievementTimeout() {
+        let achievementSelections = await this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
+        return Promise.all(achievementSelections.map(async value => {
+            if(!value.timeOutDate) {
+                value.timeOutDate = await value.calcTimeOutDate();
+                await this.achievementSelectionRepository.save(value)
+            }
+            return value
+        }))
+    }
 }

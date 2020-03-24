@@ -80,6 +80,14 @@ export class GameStateResolver {
     }
 
     @Authorized("ADMIN")
+    @Mutation( returns => [AchievementSelection], {nullable: true})
+    async updateAchievementTimeout(@Ctx() {user}): Promise<AchievementSelection[]> {
+
+        return this.mgmr.updateAchievementTimeout()
+
+    }
+
+    @Authorized("ADMIN")
     @Mutation( returns => [Notification], {nullable: true})
     async remindAchievements(@Ctx() {user}): Promise<Notification[]> {
 
