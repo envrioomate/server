@@ -269,6 +269,15 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         console.log(selection);
         return this.achievementSelectionRepository.save(selection);
     }
+
+    public async deselectAchievement(user: User, selectionId: number) {
+        let achievementSelection = await this.achievementSelectionRepository.findOne(selectionId);
+        if(!achievementSelection) return Promise.reject(`AchievementSelection not found!`);
+        if((await achievementSelection.achievementCompletions).length > 0)
+            return Promise.reject("Achievement already completed");
+        return this.achievementSelectionRepository.remove(achievementSelection);
+    }
+
     public async completeAchievement(user: User, achievementSelectionId: number) {
         let achievementSelection = await this.achievementSelectionRepository.findOne({where: {id: achievementSelectionId}});
         let achievementCompletion = await this.achievementCompletionRepository.find({where: {achievementSelection: achievementSelection, owner: user}});
@@ -337,4 +346,5 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             return value
         }))
     }
+
 }

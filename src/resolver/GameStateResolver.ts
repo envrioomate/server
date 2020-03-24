@@ -53,8 +53,14 @@ export class GameStateResolver {
     @Mutation(returns => AchievementSelection, {nullable: true})
     async selectAchievement(@Ctx() {user}, @Arg("achievementName", type => String) achievementName: string): Promise<AchievementSelection>{
         return this.mgmr.selectAchievement(user, achievementName);
-
     }
+
+    @Mutation(returns => AchievementSelection, {nullable: true})
+    async deselectAchievement(@Ctx() {user}, @Arg("selectionId", type => Int) selectionId: number): Promise<AchievementSelection>{
+        return this.mgmr.deselectAchievement(user, selectionId);
+    }
+
+
     @Mutation(returns => AchievementCompletion, {nullable: true})
     async completeAchievement(@Ctx() {user}, @Arg("achievementSelectionId", type => Int) achievementSelectionId: number): Promise<AchievementCompletion>{
         return this.mgmr.completeAchievement(user, achievementSelectionId);
