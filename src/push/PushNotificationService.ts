@@ -13,6 +13,7 @@ import {FeedPost} from "../entity/social/FeedPost";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
+import moment = require("moment");
 
 @Service()
 export class PushNotificationService {
@@ -271,7 +272,7 @@ export class PushNotificationService {
             ).map(userId => {
                 let acs = grouped[userId]
                 if (acs.length === 0) return null;
-                let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0);
+                let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0 && moment(ac.as.timeOutDate).add(7, 'day') >= moment());
                 if(uncompletedAchievements.length === 0) return null;
                 if (uncompletedAchievements.length === 1) {
                     return notifyOneUncompletedSelection(uncompletedAchievements[0].as);
