@@ -29,8 +29,8 @@ export class PushNotificationService {
         this.pushCurrentMessagesJob = schedule.scheduleJob('*/5 * * * *', this._pushPendingNotifications);
     }
 
-    private static _pushMessages = async (messages: {notification: Notification, message: ExpoPushMessage}[])
-        : Promise<{notification: Notification, message: ExpoPushMessage}[]> => {
+    private static _pushMessages = async (messages: { notification: Notification, message: ExpoPushMessage }[])
+        : Promise<{ notification: Notification, message: ExpoPushMessage }[]> => {
         const expo = new Expo();
         console.log('pushing notfications...');
         console.log(messages);
@@ -44,7 +44,7 @@ export class PushNotificationService {
                 console.error(e)
             }
         }));
-        let tickets: ExpoPushTicket[] = ticketChunks.reduce((tickets, chunks) => tickets.concat(...chunks),[]);
+        let tickets: ExpoPushTicket[] = ticketChunks.reduce((tickets, chunks) => tickets.concat(...chunks), []);
         return messages.map((message, index) => {
             message.notification.ticketId = tickets[index].id;
             return message
@@ -65,7 +65,7 @@ export class PushNotificationService {
             let recipient = await notification.user;
             let subscription = await recipient.subscription;
             let message: ExpoPushMessage = null;
-            if(subscription) {
+            if (subscription) {
                 message = {
                     to: subscription.pushToken,
                     title: notification.title,
@@ -138,7 +138,7 @@ export class PushNotificationService {
         let post = await feedComment.post || null;
 
 
-        if(parent) {
+        if (parent) {
             let parentAuthor = await parent.author;
             let subscription = await parentAuthor.subscription;
             if (subscription) {
@@ -146,7 +146,7 @@ export class PushNotificationService {
                 notification.user = Promise.resolve(parentAuthor);
                 notification.subscription = subscription;
                 notification.status = "pending";
-                notification.title = `Neuer Kommentar` ;
+                notification.title = `Neuer Kommentar`;
                 notification.body = `${feedCommentAuthor} hat auf deinen Kommentar geantwortet`;
                 notification.icon = "md-chatbubbles";
                 notification.path = "App/FeedTab/" + post.id
@@ -155,7 +155,7 @@ export class PushNotificationService {
             }
         }
 
-        if(post) {
+        if (post) {
             let parentAuthor = await post.author;
             let subscription = await parentAuthor.subscription;
             if (subscription) {
@@ -176,10 +176,10 @@ export class PushNotificationService {
     @subscribe(FeedPost)
     public async feedPostListener(_feedPost: FeedPost, action: string) {
 
-        if(action !== "pinned") return;
+        if (action !== "pinned") return;
 
         let post = await getRepository(FeedPost).findOne(_feedPost.id);
-        if(!post) {
+        if (!post) {
             console.error("empty post");
             return;
         }
@@ -226,20 +226,61 @@ export class PushNotificationService {
 
     public async remindAchievements(): Promise<Notification[]> {
         let uncompletedAchievementSelections = await this.achievementSelectionRepository.find();
-        let ac = await Promise.all(uncompletedAchievementSelections.map(async as => { return {as, ac: await as.achievementCompletions}}));
-        return Promise.all(ac
-            .filter(value => value.ac.length === 0 ? value.as : false)
-            .map(value => value.as)
-            .map(async achievementSelection => {
-                const achievement = await achievementSelection.achievement;
-                return PushNotificationService._buildNotification({
-                    recipient: await achievementSelection.owner,
-                    title: `Eine Aktivität wartet auf Dich!`,
-                    body: `Deine Aktivität "${achievement.title || achievement.name}" wartet auf Dich!`,
-                    path: "/App/BadgeTab/Achievements"
-                })
-            }).filter(value => value !== null))
-        ;
+        let ac = await Promise.all(uncompletedAchievementSelections.map(async as => {
+            return {as, ac: await as.achievementCompletions, u: await as.owner}
+        }));
+        //TODO zusammenfassen
+
+        let groupByUserId = (xs) => {
+            return xs.reduce((a, value) => {
+                let arr = (a[value.u.id] || []);
+                arr.push(value);
+                return {
+                    [value.u.id]: arr,
+                    ...a
+                }
+            }, {})
+        };
+
+        let notifyOneUncompletedSelection = async achievementSelection => {
+            const achievement = await achievementSelection.achievement;
+            return PushNotificationService._buildNotification({
+                recipient: await achievementSelection.owner,
+                title: `Eine Aktivität wartet auf Dich!`,
+                body: `Deine Aktivität "${achievement.title || achievement.name}" wartet auf Dich!`,
+                path: "/App/BadgeTab/Achievements"
+            })
+        };
+
+        let notifyManyUncompletedSelection = async (achievementSelections) => {
+            if(!achievementSelections) return null;
+            let recipient = await achievementSelections[0].owner
+            return PushNotificationService._buildNotification({
+                recipient: recipient,
+                title: `Es warten noch Aktivitäten auf Dich!`,
+                body: `Es warten noch ${achievementSelections.length} Aktivitäten auf Dich!`,
+                path: "/App/BadgeTab/Achievements"
+            })
+        };
+
+        let grouped = groupByUserId(ac);
+
+        return Promise.all(Object.keys(grouped)
+            .filter((userId) =>
+                grouped[userId] !== []
+            ).map(userId => {
+                let acs = grouped[userId]
+                if (acs.length === 0) return null;
+                let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0);
+                if(uncompletedAchievements.length === 0) return null;
+                if (uncompletedAchievements.length === 1) {
+                    return notifyOneUncompletedSelection(uncompletedAchievements[0].as);
+                } else {
+                    return notifyManyUncompletedSelection(uncompletedAchievements.map(value => value.as))
+                }
+
+            }).filter(value => value !== null));
+
     }
 
     private static async _buildNotification({recipient, title, body, icon = "md-information-circle-outline", path = "App/NotificationsTab"}): Promise<Notification> {
@@ -249,7 +290,7 @@ export class PushNotificationService {
             notification.user = Promise.resolve(recipient);
             notification.subscription = subscription;
             notification.status = "pending";
-            notification.title = title ;
+            notification.title = title;
             notification.body = body;
             notification.icon = icon;
             notification.path = path;
