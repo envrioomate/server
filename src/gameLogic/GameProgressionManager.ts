@@ -129,7 +129,11 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         try {
             const s = await this.findCurrentSeason();
             this.setCurrentSeason(s);
+            const pp = await this.getCurrentSeasonPlan();
             const sp = await this.findCurrentSeasonPlan(s);
+            if(pp.id === sp.id) {
+                publish(sp, "next")
+            }
             this.setCurrentSeasonPlan(sp);
         } catch (err) {
             console.error(err)
