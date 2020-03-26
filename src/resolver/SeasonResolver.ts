@@ -120,8 +120,10 @@ export class SeasonResolver {
     @Mutation(returns => SeasonPlan, {nullable: true})
     async updateSeasonPlan(@Ctx() {user}, @Arg("seasonPlan", type => SeasonPlanInput) seasonPlanInput: SeasonPlanInput): Promise<SeasonPlan> {
         let seasonPlan: SeasonPlan;
+        let newSeasonPlan = true;
         if (seasonPlanInput.id) {
             seasonPlan = await this.seasonPlanRepsitory.findOne({id: seasonPlanInput.id});
+            newSeasonPlan = false;
         }
         if (!seasonPlan) seasonPlan = new SeasonPlan();
         seasonPlan.season = seasonPlanInput.seasonId ? await this.seasonRepsitory.findOne({id: seasonPlanInput.seasonId}) : seasonPlan.season;
@@ -142,17 +144,17 @@ export class SeasonResolver {
         seasonPlan.position = seasonPlanInput.position ? seasonPlanInput.position : seasonPlan.position;
         seasonPlan = await this.seasonPlanRepsitory.save(seasonPlan);
 
-        let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await thema.badges).map(async (challenge): Promise<SeasonPlanChallenge> => {
-            let seasonPlanChallenge = new SeasonPlanChallenge();
-            seasonPlanChallenge.challenge = Promise.resolve(challenge);
-            seasonPlanChallenge.plan = Promise.resolve(seasonPlan);
-            return this.seasonPlanChallengeRepsitory.save(seasonPlanChallenge);
-        }));
-
-        seasonPlan.challenges = Promise.resolve(seasonPlanChallenges);
+        if(newSeasonPlan) {
+            let seasonPlanChallenges: SeasonPlanChallenge[] = await Promise.all((await thema.badges).map(async (challenge): Promise<SeasonPlanChallenge> => {
+                let seasonPlanChallenge = new SeasonPlanChallenge();
+                seasonPlanChallenge.challenge = Promise.resolve(challenge);
+                seasonPlanChallenge.plan = Promise.resolve(seasonPlan);
+                return this.seasonPlanChallengeRepsitory.save(seasonPlanChallenge);
+            }));
+            seasonPlan.challenges = Promise.resolve(seasonPlanChallenges);
+        }
 
         seasonPlan = await this.seasonPlanRepsitory.save(seasonPlan);
-        publish(seasonPlan, "update", true);
 
 
         return seasonPlan;
