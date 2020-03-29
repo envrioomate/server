@@ -50,7 +50,7 @@ export class Tasks {
         });
 
         let remindAchievementsTimer = new schedule.RecurrenceRule();
-        mondayTimer.dayOfWeek = [3];
+        remindAchievementsTimer.dayOfWeek = [3];
         remindAchievementsTimer.hour = [18];
         remindAchievementsTimer.minute = 0;
         this.remindAchievementsJob = schedule.scheduleJob(remindAchievementsTimer, () => {
@@ -60,7 +60,7 @@ export class Tasks {
         });
 
         let updateAchievementsTimer = new schedule.RecurrenceRule();
-        mondayTimer.dayOfWeek = [3];
+        updateAchievementsTimer.dayOfWeek = [3];
         updateAchievementsTimer.hour = [18];
         updateAchievementsTimer.minute = 0;
         this.updateAchievementsJob = schedule.scheduleJob(updateAchievementsTimer, () => {
