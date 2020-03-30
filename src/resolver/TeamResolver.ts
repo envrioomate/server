@@ -51,7 +51,9 @@ export class TeamResolver {
         let newMembership = new Membership();
         newMembership.user = Promise.resolve(user);
         newMembership.team = Promise.resolve(team);
-        return this.memberRepository.save(newMembership);
+        newMembership = await this.memberRepository.save(newMembership);
+        publish(newMembership, "request", true);
+        return newMembership;
     }
 
     private async _confirm(memberShip: Membership): Promise<Membership> {

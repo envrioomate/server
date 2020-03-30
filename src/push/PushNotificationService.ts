@@ -14,6 +14,7 @@ import {SeasonPlan} from "../entity/game-state/SeasonPlan";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import moment = require("moment");
+import {ChallengeCompletion} from "../entity/game-state/ChallengeCompletion";
 
 @Service()
 export class PushNotificationService {
@@ -104,29 +105,95 @@ export class PushNotificationService {
     }
 
     @subscribe(Membership)
-    public async membershipListener(membership: Membership, action: string) {
-        switch (action) {
-            case 'confirm':
-                return this.notifyJoinedTeam(membership);
-            case 'request':
-                return this.notifyRequestJoinTeam(membership);
-            case 'admin':
-                return this.notifyAdminStatusChanged(membership);
-            default:
-                console.error(`Action ${action} not matched by PushNotificationService.membershipListener!`);
-                return;
+    public async notifyJoinedTeam(_memberShip: Membership, action: string) {
+        if(action !== "confirm") return ;
+        try {
+            let membership = await getRepository(Membership).findOne(_memberShip.id);
+            if(!membership) return;
+
+            let team = await membership.team;
+            let user = await membership.user
+
+            let otherMembers = (await team.members).filter(value => value.id !== membership.id);
+
+            otherMembers.map(async value => {
+                let recipient = await value.user;
+                await PushNotificationService._buildNotification({
+                    recipient,
+                    title: `Dein Team wird größer!`,
+                    body: `${user.userName} ist deinem Team beigetreten!`,
+                    icon: 'md-group',
+                    path: 'App/CompetitiveTab/Main/MyTeams'
+                })
+            });
+        } catch (e) {
+            console.error(e)
         }
     }
 
-    public async notifyJoinedTeam(memberShip: Membership) {
+    @subscribe(Membership)
+    public async notifyRequestJoinTeam(_memberShip: Membership, action: string) {
+        if(action !== "request") return ;
+        try {
+            let membership = await getRepository(Membership).findOne(_memberShip.id);
+            if(!membership) return;
 
-    }
+            let team = await membership.team;
+            let user = await membership.user
 
-    public async notifyRequestJoinTeam(memberShip: Membership) {
+            let otherMembers = (await team.members).filter(value => value.id !== membership.id && value.isAdmin);
 
+            otherMembers.map(async value => {
+                let recipient = await value.user;
+                await PushNotificationService._buildNotification({
+                    recipient,
+                    title: `Dein Team wird größer!`,
+                    body: `${user.userName} möchte deinem Team beitreten.`,
+                    icon: 'md-group',
+                    path: 'App/CompetitiveTab/Main/MyTeams'
+                })
+            });
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     public async notifyAdminStatusChanged(memberShip: Membership) {
+
+    }
+
+    @subscribe(ChallengeCompletion)
+    public async teamAcquiredBadge(_challengeCompletion: ChallengeCompletion, action: string) {
+        if(action !== "add") return;
+        try {
+            let challengeCompletion = await getRepository(ChallengeCompletion).findOne(_challengeCompletion.id);
+            if (!challengeCompletion) return;
+            if (challengeCompletion.teamNotified) return;
+
+            challengeCompletion.teamNotified = true;
+
+            let owner = await challengeCompletion.owner;
+            let memberships = await owner.memberships;
+            let team = memberships.length > 0 ? await memberships[0].team : null;
+            if (team === null) return;
+
+            let members = (await team.members).filter(value => value.id !== memberships[0].id);
+
+            let badge = await (await challengeCompletion.seasonPlanChallenge).challenge;
+
+            members.map(async value => {
+                let recipient = await value.user;
+                await PushNotificationService._buildNotification({
+                    recipient,
+                    title: `Dein Team punktet!`,
+                    body: `${owner.userName} hat gerade das Abzeichen ${badge.name} geschafft!`,
+                    icon: 'md-star',
+                    path: 'App/CompetitiveTab'
+                })
+            });
+        } catch (e) {
+            console.error(e)
+        }
 
     }
 

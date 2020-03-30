@@ -50,5 +50,8 @@ export class ChallengeCompletion {
     @Column({type: "double"})
     challengeCompletionQuantity: number; //null if qualitative Badge
 
+    @Field(type => Boolean, {nullable: true})
+    @Column({default: false})
+    teamNotified: boolean = false;
 
 }
