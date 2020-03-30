@@ -120,7 +120,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     }
 
     @subscribe([Season, SeasonPlan])
-    public static async listen(season: Season) {
+    public static async listen(season: Season, action) {
+        if(action === "next") return;
         Container.get(GameProgressionManager).setUpCurrentSeason();
     }
 
