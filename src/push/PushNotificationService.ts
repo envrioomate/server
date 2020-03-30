@@ -148,7 +148,7 @@ export class PushNotificationService {
                 await PushNotificationService._buildNotification({
                     recipient,
                     title: `Dein Team wird größer!`,
-                    body: `${user.userName} möchte deinem Team beitreten.`,
+                    body: `${user.screenName} möchte deinem Team beitreten.`,
                     icon: 'md-group',
                     path: 'App/CompetitiveTab/Main/MyTeams'
                 })
@@ -187,7 +187,7 @@ export class PushNotificationService {
                 await PushNotificationService._buildNotification({
                     recipient,
                     title: `Dein Team punktet!`,
-                    body: `${owner.userName} hat gerade das Abzeichen ${badge.name} geschafft!`,
+                    body: `${owner.screenName} hat gerade das Abzeichen ${badge.name} geschafft!`,
                     icon: 'md-star',
                     path: 'App/CompetitiveTab'
                 })
