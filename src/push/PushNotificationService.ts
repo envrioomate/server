@@ -171,6 +171,7 @@ export class PushNotificationService {
             if (challengeCompletion.teamNotified) return;
 
             challengeCompletion.teamNotified = true;
+            await getRepository(ChallengeCompletion).save(challengeCompletion);
 
             let owner = await challengeCompletion.owner;
             let memberships = await owner.memberships;
