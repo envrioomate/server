@@ -79,11 +79,22 @@ export class LeaderBoardManager {
 
     @subscribe(Membership)
     public static async updateTeamSize(_membership: Membership, action: string) {
-        let membership = await Container.get(LeaderBoardManager).membershipRepository.findOne(_membership.id);
-        let team = await membership.team;
-        console.log(`Updating team size on ${team.name}`);
-        team.updateTeamSize(action).catch(err => console.error(err));
-        team.recalculateScore().catch(err => console.error(err));
+        try {
+            let membership = await Container.get(LeaderBoardManager).membershipRepository.findOne(_membership.id);
+            if(membership.isAccepted && membership.isActive) {
+                let team = await membership.team;
+                console.log(`Updating team size on ${team.name}`);
+                team.updateTeamSize(action).catch(err => console.error(err));
+                team.recalculateScore().catch(err => console.error(err));
+                Container.get(LeaderBoardManager).recalculateLeaderBoardPositions().catch(err => {
+                    throw err;
+                })
+            } else
+                return
+        } catch (e) {
+            console.log(e)
+        }
+
     }
 
     public async recalculateLeaderBoardPositions() {
