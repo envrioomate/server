@@ -43,7 +43,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Ameise",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/ant.png"
+                path: "playerLevels/ant.png"
             },
             maxScore: 700
         },
@@ -52,7 +52,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Biene",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/bee.png"
+                path: "playerLevels/bee.png"
             },
             maxScore: 1400
         },
@@ -61,7 +61,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Schmetterling",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/butterfly.png"
+                path: "playerLevels/butterfly.png"
             },
             maxScore: 2100
         },
@@ -70,7 +70,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Heuschrecke",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/cricket.png"
+                path: "playerLevels/cricket.png"
             },
             maxScore: 2800
         },
@@ -79,7 +79,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Libelle",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/dragonfly.png"
+                path: "playerLevels/dragonfly.png"
             },
             maxScore: 3500
         },
@@ -88,7 +88,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Schecke",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/snail.png"
+                path: "playerLevels/snail.png"
             },
             maxScore: 4300
         },
@@ -97,7 +97,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Seepferdchen",
             icon: {
                 type: "remote",
-                path: "./img/playerLevels/seahorse.png"
+                path: "playerLevels/seahorse.png"
             },
             maxScore: 99999
         }
