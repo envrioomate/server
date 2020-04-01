@@ -11,6 +11,7 @@ import {LeaderBoardManager} from "../gameLogic/LeaderBoardManager";
 import {UserScoreManager} from "../gameLogic/UserScoreManager";
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import {AchievementCompletion} from "../entity/game-state/AchievementCompletion";
+import {LevelUpTable, PlayerLevel} from "../gameLogic/PlayerLevel";
 
 @Resolver()
 export class UserResolver {
@@ -113,6 +114,25 @@ export class UserResolver {
     @Mutation(returns => [AchievementCompletion])
     async checkStartingAchievement() {
         return Container.get(UserScoreManager).checkStartingAchievement()
+    }
+
+    @Query( returns => PlayerLevel, {nullable: true})
+    public async getLevelData(
+        @Ctx() {user}: Context,
+        @Arg("levelIndex", type => Int) levelIndex: number
+    ) : Promise<PlayerLevel> {
+        const level = LevelUpTable.find(level => level.index === levelIndex);
+        if(level)
+            return Promise.resolve(level);
+        else
+            return Promise.reject("Index out of bounds");
+    }
+
+    @Authorized("ADMIN")
+    @Mutation(returns => [User])
+    async updatePlayerLevels() {
+        let users = await this.userRepository.find();
+        return users.map(user => user.updateLevel())
     }
 }
 

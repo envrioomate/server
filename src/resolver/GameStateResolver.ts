@@ -1,4 +1,4 @@
-import {Arg, Authorized, Ctx, Int, Mutation, Query, Resolver} from "type-graphql";
+import {Arg, Authorized, Ctx, Field, Int, Mutation, ObjectType, Query, Resolver} from "type-graphql";
 import {Season} from "../entity/game-state/Season";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
 import {GameProgressionManager} from "../gameLogic/GameProgressionManager";
@@ -11,7 +11,21 @@ import {AchievementCompletion} from "../entity/game-state/AchievementCompletion"
 import {User} from "../entity/user/User";
 import {PushNotificationService} from "../push/PushNotificationService";
 import {Notification} from "../entity/user/Notification";
+import {getCurrentLevel, PlayerLevel} from "../gameLogic/PlayerLevel";
 
+@ObjectType()
+export class UserProgress {
+
+    @Field(type => Int)
+    score: number;
+
+    @Field(type => Int)
+    currentLevel: number;
+
+    @Field(type => PlayerLevel)
+    levelData: PlayerLevel;
+
+}
 
 @Resolver()
 export class GameStateResolver {
@@ -48,6 +62,15 @@ export class GameStateResolver {
     @Query(returns => Number)
     async score(@Ctx() {user}): Promise<number> {
         return user.score;
+    }
+
+    @Query(returns => UserProgress)
+    async playerProgress(@Ctx() {user}): Promise<UserProgress> {
+        let up = new UserProgress();
+        up.score = user.score;
+        up.currentLevel = user.playerLevel;
+        up.levelData = getCurrentLevel(up.score);
+        return up;
     }
 
     @Mutation(returns => AchievementSelection, {nullable: true})
