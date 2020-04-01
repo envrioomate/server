@@ -12,6 +12,7 @@ import {User} from "../entity/user/User";
 import {PushNotificationService} from "../push/PushNotificationService";
 import {Notification} from "../entity/user/Notification";
 import {getCurrentLevel, PlayerLevel} from "../gameLogic/PlayerLevel";
+import {Team} from "../entity/social/Team";
 
 @ObjectType()
 export class UserProgress {
@@ -24,6 +25,9 @@ export class UserProgress {
 
     @Field(type => PlayerLevel)
     levelData: PlayerLevel;
+
+    @Field(type => Team, {nullable: true})
+    team?: Team;
 
 }
 
@@ -70,6 +74,8 @@ export class GameStateResolver {
         up.score = user.score;
         up.currentLevel = user.playerLevel;
         up.levelData = getCurrentLevel(up.score);
+        let m = await user.memberships;
+        if(m.length > 0 ) up.team = await m[0].team;
         return up;
     }
 
