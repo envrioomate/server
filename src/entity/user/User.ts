@@ -25,6 +25,7 @@ import {AchievementSelection} from "../game-state/AchievementSelection";
 import {AchievementCompletion, AchievementCompletionType} from "../game-state/AchievementCompletion";
 import {Badge} from "../wiki-content/Badge";
 import {publish} from "../../util/EventUtil";
+import {getCurrentLevel, LevelUpTable, PlayerLevel} from "../../gameLogic/PlayerLevel";
 
 export enum Role {
     User = 0,
@@ -126,10 +127,25 @@ export class User { //TODO split into profile data and user data
     @Column({default: 0})
     score: number;
 
+    @Field(type => Int)
+    @Column({default: -1})
+    playerLevel: number;
+
     @BeforeInsert()
     public encrypt() {
         if (this.password)
             this.hash = bcrypt.hashSync(this.password, bcrypt.genSaltSync()); //TODO make more async
+    }
+
+    public async updateLevel(): Promise<User> {
+        let currentLevel = this.playerLevel;
+        let newLevel = getCurrentLevel(this.score).index;
+        let _user = await getRepository(User).save(this);
+        if(newLevel > currentLevel) {
+            //only notify on Level Ups
+            publish(_user, "levelup", true);
+        }
+        return _user
     }
 
     public validatePassword(candidate: string): boolean {
@@ -211,6 +227,7 @@ export class User { //TODO split into profile data and user data
         const badgeScore = badgeScores.reduce(sum, 0);
         this.score = achievementScore + badgeScore;
         let currentUser = await getRepository(User).save(this).catch(err => console.error(err));
+        await this.updateLevel();
         publish(currentUser, "ScoreUpdated", true);
         return currentUser || null
     }
