@@ -15,6 +15,7 @@ import {AchievementCompletion} from "../entity/game-state/AchievementCompletion"
 import {AchievementSelection} from "../entity/game-state/AchievementSelection";
 import moment = require("moment");
 import {ChallengeCompletion} from "../entity/game-state/ChallengeCompletion";
+import {getCurrentLevel} from "../gameLogic/PlayerLevel";
 
 @Service()
 export class PushNotificationService {
@@ -106,10 +107,10 @@ export class PushNotificationService {
 
     @subscribe(Membership)
     public async notifyJoinedTeam(_memberShip: Membership, action: string) {
-        if(action !== "confirm") return ;
+        if (action !== "confirm") return;
         try {
             let membership = await getRepository(Membership).findOne(_memberShip.id);
-            if(!membership) return;
+            if (!membership) return;
 
             let team = await membership.team;
             let user = await membership.user
@@ -133,10 +134,10 @@ export class PushNotificationService {
 
     @subscribe(Membership)
     public async notifyRequestJoinTeam(_memberShip: Membership, action: string) {
-        if(action !== "request") return ;
+        if (action !== "request") return;
         try {
             let membership = await getRepository(Membership).findOne(_memberShip.id);
-            if(!membership) return;
+            if (!membership) return;
 
             let team = await membership.team;
             let user = await membership.user
@@ -164,7 +165,7 @@ export class PushNotificationService {
 
     @subscribe(ChallengeCompletion)
     public async teamAcquiredBadge(_challengeCompletion: ChallengeCompletion, action: string) {
-        if(action !== "add") return;
+        if (action !== "add") return;
         try {
             let challengeCompletion = await getRepository(ChallengeCompletion).findOne(_challengeCompletion.id);
             if (!challengeCompletion) return;
@@ -293,6 +294,33 @@ export class PushNotificationService {
 
     }
 
+    @subscribe(User)
+    public async notifyTeamLevelUp(_user, action) {
+        try {
+            let user = await getRepository(User).findOne(_user.id);
+            if (!user || action !== "levelup") return;
+            let playerLevel = getCurrentLevel(user.score);
+            let memberships = await user.memberships;
+            let team = memberships.length > 0 ? await memberships[0].team : null;
+            if (team === null) return;
+
+            let members = (await team.members).filter(value => value.id !== memberships[0].id);
+
+            members.map(async value => {
+                let recipient = await value.user;
+                await PushNotificationService._buildNotification({
+                    recipient,
+                    title: `Dein Team levelt auf!`,
+                    body: `Dein Teammitglied ${user.screenName} hat gerade die Entwicklungsstufe ${playerLevel.name} in rot erreicht.`,
+                    icon: 'md-star',
+                    path: 'App/CompetitiveTab'
+                })
+            });
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
     public async remindAchievements(): Promise<Notification[]> {
         let uncompletedAchievementSelections = await this.achievementSelectionRepository.find();
         let ac = await Promise.all(uncompletedAchievementSelections.map(async as => {
@@ -322,7 +350,7 @@ export class PushNotificationService {
         };
 
         let notifyManyUncompletedSelection = async (achievementSelections) => {
-            if(!achievementSelections) return null;
+            if (!achievementSelections) return null;
             let recipient = await achievementSelections[0].owner
             return PushNotificationService._buildNotification({
                 recipient: recipient,
@@ -341,7 +369,7 @@ export class PushNotificationService {
                 let acs = grouped[userId]
                 if (acs.length === 0) return null;
                 let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0 && moment(ac.as.timeOutDate).add(7, 'day') >= moment());
-                if(uncompletedAchievements.length === 0) return null;
+                if (uncompletedAchievements.length === 0) return null;
                 if (uncompletedAchievements.length === 1) {
                     return notifyOneUncompletedSelection(uncompletedAchievements[0].as);
                 } else {
