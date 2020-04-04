@@ -178,16 +178,34 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             // TODO define meaningful pre-season text
             return undefined
         }
+
         let seasonPlans = await season.seasonPlan;
-        seasonPlans.sort((a,b) => b.position - a.position)
+        seasonPlans = seasonPlans.sort((a,b) => a.position - b.position);
         console.log(timeInSeason, seasonPlans);
-        let currentSeasonPlan =  seasonPlans.slice(0).reduce((acc, cur) => { // don't do that to reduce, it has done nothing wrong! :(
-            timeInSeason = timeInSeason - cur.duration;
-            if (timeInSeason <= 0) {
-                console.log("get sp: ", timeInSeason, cur)
-                return cur;
+
+        let currentSeasonPlan = undefined;
+        let now = moment();
+        let seasonContentStartDate = moment( season.startOffsetDate.getTime());
+        let timeInSeasonMoment =  moment( season.startOffsetDate.getTime());
+
+        console.log(
+            {
+                now: now.format(),
+                seasonContentStartDate: seasonContentStartDate.format(),
+                timeInSeasonMoment: timeInSeasonMoment.format()
             }
-        }, undefined)
+        );
+
+        for( const sp of seasonPlans) {
+            if(moment.max(timeInSeasonMoment.add(sp.duration, "seconds"), now) !== now) {
+                currentSeasonPlan = sp;
+                break;
+            } else {
+                timeInSeasonMoment = timeInSeasonMoment.add(sp.duration, "seconds")
+            }
+        }
+
+
         console.log(await currentSeasonPlan);
 
         return currentSeasonPlan
