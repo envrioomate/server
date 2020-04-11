@@ -326,7 +326,6 @@ export class PushNotificationService {
         let ac = await Promise.all(uncompletedAchievementSelections.map(async as => {
             return {as, ac: await as.achievementCompletions, u: await as.owner}
         }));
-        //TODO zusammenfassen
 
         let groupByUserId = (xs) => {
             return xs.reduce((a, value) => {
@@ -368,7 +367,7 @@ export class PushNotificationService {
             ).map(userId => {
                 let acs = grouped[userId]
                 if (acs.length === 0) return null;
-                let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0 && moment(ac.as.timeOutDate).add(7, 'day') >= moment());
+                let uncompletedAchievements = acs.filter(ac => ac.ac.length === 0 && moment(ac.as.timeOutDate).add(7, 'day') <= moment());
                 if (uncompletedAchievements.length === 0) return null;
                 if (uncompletedAchievements.length === 1) {
                     return notifyOneUncompletedSelection(uncompletedAchievements[0].as);
