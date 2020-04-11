@@ -63,6 +63,12 @@ export class GameStateResolver {
         return this.mgmr.getCurrentlySelectedAchievementsForUser(user);
     }
 
+    @Query(returns => [AchievementSelection], {nullable: true})
+    async pastSelectedAchievements(@Ctx() {user}): Promise<AchievementSelection[]> {
+        return this.mgmr.getPastSelectedAchievementsForUser(user);
+    }
+
+
     @Query(returns => Number)
     async score(@Ctx() {user}): Promise<number> {
         return user.score;

@@ -3,7 +3,7 @@ import {Badge} from "../entity/wiki-content/Badge";
 import {ChallengeCompletion, ChallengeGoalCompletionLevel} from "../entity/game-state/ChallengeCompletion";
 import {SeasonPlanChallenge} from "../entity/game-state/SeasonPlanChallenge";
 import {InjectRepository} from "typeorm-typedi-extensions";
-import {EntitySubscriberInterface, EventSubscriber, InsertEvent, LessThan, MoreThan, Repository} from "typeorm";
+import {EntitySubscriberInterface, EventSubscriber, InsertEvent, IsNull, LessThan, MoreThan, Repository} from "typeorm";
 import {User} from "../entity/user/User";
 import {Season} from "../entity/game-state/Season";
 import {SeasonPlan} from "../entity/game-state/SeasonPlan";
@@ -20,12 +20,14 @@ import {AchievementCompletion, AchievementCompletionType} from "../entity/game-s
 
 import * as moment from 'moment';
 import 'moment/locale/de';
+
 moment.locale('de');
 
 const {promisify} = require('util');
+
 @Service()
 @EventSubscriber()
-export class GameProgressionManager implements EntitySubscriberInterface{
+export class GameProgressionManager implements EntitySubscriberInterface {
 
     private redisClient: RedisClient = Container.get("redis");
     private readonly getRedisAsync: Function;
@@ -37,14 +39,14 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     // In production, this could be used to fix errors in the current season and immediately reflect these changes in the app.
     // TODO fix this it doesn't work
     afterUpdate(event: InsertEvent<any>) {
-        if(event.entity instanceof Season || event.entity instanceof SeasonPlan) {
+        if (event.entity instanceof Season || event.entity instanceof SeasonPlan) {
             console.log(`BEFORE ENTITY INSERTED: `, event.entity);
             this.setUpCurrentSeason();
         }
     }
 
     afterInsert(event: InsertEvent<any>) {
-        if(event.entity instanceof Season || event.entity instanceof SeasonPlan) {
+        if (event.entity instanceof Season || event.entity instanceof SeasonPlan) {
             console.log(`BEFORE ENTITY INSERTED: `, event.entity);
             this.setUpCurrentSeason();
         }
@@ -121,7 +123,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     @subscribe([Season, SeasonPlan])
     public static async listen(season: Season, action) {
-        if(action === "next") return;
+        if (action === "next") return;
         Container.get(GameProgressionManager).setUpCurrentSeason();
     }
 
@@ -172,7 +174,7 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     }
 
     private async findCurrentSeasonPlan(season: Season): Promise<SeasonPlan> { //TODO wait for start offset date
-        let timeInSeason = (Date.now() - (season.startOffsetDate.getTime()) ) / 1000;
+        let timeInSeason = (Date.now() - (season.startOffsetDate.getTime())) / 1000;
         if (timeInSeason < 0) {
             // we are in the season startDate - startOffsetDate gap, so no SeasonPlan should be activated.
             // TODO define meaningful pre-season text
@@ -180,13 +182,13 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         }
 
         let seasonPlans = await season.seasonPlan;
-        seasonPlans = seasonPlans.sort((a,b) => a.position - b.position);
+        seasonPlans = seasonPlans.sort((a, b) => a.position - b.position);
         console.log(timeInSeason, seasonPlans);
 
         let currentSeasonPlan = undefined;
         let now = moment();
-        let seasonContentStartDate = moment( season.startOffsetDate.getTime());
-        let timeInSeasonMoment =  moment( season.startOffsetDate.getTime());
+        let seasonContentStartDate = moment(season.startOffsetDate.getTime());
+        let timeInSeasonMoment = moment(season.startOffsetDate.getTime());
 
         console.log(
             {
@@ -196,8 +198,8 @@ export class GameProgressionManager implements EntitySubscriberInterface{
             }
         );
 
-        for( const sp of seasonPlans) {
-            if(moment.max(timeInSeasonMoment.add(sp.duration, "seconds"), now) !== now) {
+        for (const sp of seasonPlans) {
+            if (moment.max(timeInSeasonMoment.add(sp.duration, "seconds"), now) !== now) {
                 currentSeasonPlan = sp;
                 break;
             } else {
@@ -254,17 +256,19 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         console.log(await currentSeasonPlan.challenges);
         let challenges: IUserChallenge[] = await currentSeasonPlan.challenges;
         challenges = (await Promise.all(
-            challenges.map(async c => {return {challenge: c}})))
+            challenges.map(async c => {
+                return {challenge: c}
+            })))
             .map(v => v.challenge);
 
         console.log(await challenges.map(challenge => challenge.challenge.then(async c => await c.thema)));
 
-         return challenges;
+        return challenges;
     }
 
 
     public async getCompletedChallengesForUser(user: User): Promise<ChallengeCompletion[]> {
-        return  this.challengeCompletionRepository.find({where: {owner: user}})
+        return this.challengeCompletionRepository.find({where: {owner: user}})
     }
 
     private async getSeasonPlanChallengeFromCurrentSeasonPlanById(seasonPlanChallengeId: number): Promise<SeasonPlanChallenge> {
@@ -274,14 +278,49 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     }
 
     public async getCurrentlySelectedAchievementsForUser(user: User) {
-        return this.achievementSelectionRepository.find({where: {owner: user}});
+        const now = moment();
+        let selectedAchievements = await this.achievementSelectionRepository.find({
+            where: {
+                owner: user
+            }
+        });
+
+        return (await Promise.all(selectedAchievements.map(async value => {
+            let achievement = await value.achievement;
+            let weeksCurrent = achievement.weeks;
+            let then = value.createdAt;
+            return moment.min(now, moment(then).add(weeksCurrent, "weeks")) === now ? value : null
+        }))).filter(value => value !== null)
+    }
+
+
+    public async getPastSelectedAchievementsForUser(user: User) {
+        const now = moment();
+        let selectedAchievements = await this.achievementSelectionRepository.find({
+            where: {
+                owner: user
+            }
+        });
+
+        return (await Promise.all(selectedAchievements.map(async value => {
+            let achievement = await value.achievement;
+            let weeksCurrent = achievement.weeks;
+            let then = value.createdAt;
+            return moment.max(now, moment(then).add(weeksCurrent, "weeks")) === now ? value : null
+        }))).filter(value => value !== null)
     }
 
     public async selectAchievement(user: User, achievementName: string) {
         let achievement = await this.achievementRepository.findOne({where: {name: achievementName}});
-        if(!achievement) return Promise.reject(`Achievement ${achievementName} not found!`);
-        let achievementSelection = await this.achievementSelectionRepository.findOne({where: {achievement: achievement, owner: user}});
-        if(achievementSelection) return achievementSelection;
+        if (!achievement) return Promise.reject(`Achievement ${achievementName} not found!`);
+        let achievementSelection = await this.achievementSelectionRepository.findOne({
+            where: {
+                achievement: achievement,
+                owner: user
+            }
+        });
+        achievementSelection.achievementCompletions
+        if (achievementSelection) return achievementSelection;
         let selection = new AchievementSelection();
         selection.owner = Promise.resolve(user);
         selection.achievement = Promise.resolve(achievement);
@@ -291,22 +330,27 @@ export class GameProgressionManager implements EntitySubscriberInterface{
 
     public async deselectAchievement(user: User, selectionId: number) {
         let achievementSelection = await this.achievementSelectionRepository.findOne(selectionId);
-        if(!achievementSelection) return Promise.reject(`AchievementSelection not found!`);
-        if((await achievementSelection.achievementCompletions).length > 0)
+        if (!achievementSelection) return Promise.reject(`AchievementSelection not found!`);
+        if ((await achievementSelection.achievementCompletions).length > 0)
             return Promise.reject("Achievement already completed");
         return this.achievementSelectionRepository.remove(achievementSelection);
     }
 
     public async completeAchievement(user: User, achievementSelectionId: number) {
         let achievementSelection = await this.achievementSelectionRepository.findOne({where: {id: achievementSelectionId}});
-        let achievementCompletion = await this.achievementCompletionRepository.find({where: {achievementSelection: achievementSelection, owner: user}});
+        let achievementCompletion = await this.achievementCompletionRepository.find({
+            where: {
+                achievementSelection: achievementSelection,
+                owner: user
+            }
+        });
 
         //TODO Gate based on frequency
-        if(achievementCompletion.length > 0) {
-            achievementCompletion.sort((a,b) => {
+        if (achievementCompletion.length > 0) {
+            achievementCompletion.sort((a, b) => {
                 return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
             });
-            let lastCompletion = achievementCompletion[achievementCompletion.length - 1] ;
+            let lastCompletion = achievementCompletion[achievementCompletion.length - 1];
             let now = moment();
             let input = moment(lastCompletion.updatedAt);
             let isThisWeek = (now.isoWeek() == input.isoWeek())
@@ -327,17 +371,17 @@ export class GameProgressionManager implements EntitySubscriberInterface{
     public async checkFailedAchievement(achievementSelection: AchievementSelection): Promise<AchievementCompletion> {
         let now = moment();
 
-        if(!achievementSelection.timeOutDate) {
+        if (!achievementSelection.timeOutDate) {
             achievementSelection.timeOutDate = await achievementSelection.calcTimeOutDate();
             await this.achievementSelectionRepository.save(achievementSelection)
         }
 
-        if((await achievementSelection.achievementCompletions).length > 0) {
+        if ((await achievementSelection.achievementCompletions).length > 0) {
             return;
         }
 
         let timeOutDate = moment(achievementSelection.timeOutDate);
-        if(moment.max(timeOutDate, now) === now) {
+        if (moment.max(timeOutDate, now) === now) {
             let completion = new AchievementCompletion();
             completion.owner = Promise.resolve(await achievementSelection.owner);
             completion.achievement = Promise.resolve(await achievementSelection.achievement);
@@ -352,18 +396,18 @@ export class GameProgressionManager implements EntitySubscriberInterface{
         let uncompletedAchievementSelections = await this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
         let result = await Promise.all((uncompletedAchievementSelections.map(selection => this.checkFailedAchievement(selection))).filter(v => v !== null));
         console.log({result: await result})
-        return result.filter(v => v !== undefined && v!== null);
+        return result.filter(v => v !== undefined && v !== null);
     }
 
     public async updateAchievementTimeout() {
         let achievementSelections = await this.achievementSelectionRepository.find({where: {achievementCompletions: []}});
         return Promise.all(achievementSelections.map(async value => {
-            if(!value.timeOutDate) {
+            if (!value.timeOutDate) {
                 value.timeOutDate = await value.calcTimeOutDate();
                 await this.achievementSelectionRepository.save(value)
             }
             return value
         }))
     }
-
 }
+
