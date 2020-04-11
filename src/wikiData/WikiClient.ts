@@ -143,7 +143,7 @@ export class WikiClient {
         await this.wikiWaringRepsitory.remove(dbWarnings)
             .catch(err => console.error("WikiClient Error: " + err.toString()));
 
-        let warnings: WikiWarnings[] = [];
+        let warnings = [];
         try {
             if (!pageData.templateData) {
                 throw new Error(warnings.toString())
@@ -162,7 +162,7 @@ export class WikiClient {
             let themaResult = await this.themaRepository.save(thema); // save everything through cascading
         } catch (e) {
             console.error(e.message);
-            warnings.push(WikiWarnings.TemplateParsingError);
+            warnings.push({wikiWarning: WikiWarnings.TemplateParsingError, error: e.message});
         }
         if (warnings.length > 0) {
             let wikiWarning = WikiWarning.fromWarnings(warnings);

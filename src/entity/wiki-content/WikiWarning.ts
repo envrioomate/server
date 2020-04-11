@@ -46,9 +46,14 @@ export class WikiWarning {
     @Column()
     warnings: string; // Simplicity > NF and TypeORMs non existent set support TODO make less broken
 
-    static fromWarnings(warnings: WikiWarnings[]): WikiWarning {
+    @Field(type => String, {nullable: true})
+    @Column("longtext", {nullable: true})
+    error: string;
+
+    static fromWarnings(warnings: {wikiwarning: WikiWarning, error: string}[]): WikiWarning {
         let wikiWarning = new WikiWarning();
-        wikiWarning.warnings = warnings.map((w) => w.toString()).join('|');
+        wikiWarning.warnings = warnings.map((w) => w.wikiwarning.toString()).join('|');
+        wikiWarning.error = warnings.map(w => w.error.toString()).join('|');
         return wikiWarning;
     }
 
