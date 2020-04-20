@@ -319,7 +319,6 @@ export class GameProgressionManager implements EntitySubscriberInterface {
                 owner: user
             }
         });
-        achievementSelection.achievementCompletions
         if (achievementSelection) return achievementSelection;
         let selection = new AchievementSelection();
         selection.owner = Promise.resolve(user);
