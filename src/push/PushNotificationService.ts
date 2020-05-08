@@ -290,8 +290,7 @@ export class PushNotificationService {
             });
         })) || null;
 
-        return;
-
+        return pendingNotifications || null;
     }
 
     @subscribe(User)

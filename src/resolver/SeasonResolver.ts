@@ -18,6 +18,8 @@ import {Container} from "typedi";
 import {SeasonPlanChallenge} from "../entity/game-state/SeasonPlanChallenge";
 import {GameProgressionManager} from "../gameLogic/GameProgressionManager";
 import {publish} from "../util/EventUtil";
+import {Notification} from "../entity/user/Notification";
+import {PushNotificationService} from "../push/PushNotificationService";
 
 
 @Resolver()
@@ -168,6 +170,13 @@ export class SeasonResolver {
     @Query(returns => Props, {nullable: true})
     async getPageProps(@Ctx() {user}, @Arg("pageId", type => Int) pageId: number): Promise<Props> {
         return this.propsRepository.findOne(pageId);
+    }
+
+    @Authorized("ADMIN")
+    @Mutation( returns => [Notification], {nullable: true})
+    async remindNewSP(@Ctx() {user}): Promise<Notification[]> {
+        return Container.get(PushNotificationService).seasonPlanListener(
+            await Container.get(GameProgressionManager).getCurrentSeasonPlan(),"update")
     }
 
 }
