@@ -199,14 +199,13 @@ export class GameProgressionManager implements EntitySubscriberInterface {
         );
 
         for (const sp of seasonPlans) {
-            if (moment.max(timeInSeasonMoment.add(sp.duration, "seconds"), now) !== now) {
+            let newTime = timeInSeasonMoment.add(sp.duration, "seconds");
+            console.log({testedSP: sp, newTime});
+            if (moment.max(newTime, now) !== now) {
                 currentSeasonPlan = sp;
                 break;
-            } else {
-                timeInSeasonMoment = timeInSeasonMoment.add(sp.duration, "seconds")
             }
         }
-
 
         console.log(await currentSeasonPlan);
 
