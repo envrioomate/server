@@ -43,7 +43,8 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Ameise",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/ant.png")},
+                path: "assets/playerLevels/ant.png"
+            },
             maxScore: 700
         },
         {
@@ -51,7 +52,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Biene",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/bee.png")
+                path: "assets/playerLevels/bee.png"
             },
             maxScore: 1400
         },
@@ -60,7 +61,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Schmetterling",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/butterfly.png")
+                path: "assets/playerLevels/butterfly.png"
             },
             maxScore: 2100
         },
@@ -69,7 +70,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Heuschrecke",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/cricket.png")
+                path: "assets/playerLevels/cricket.png"
             },
             maxScore: 2800
         },
@@ -78,7 +79,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Libelle",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/dragonfly.png")
+                path: "assets/playerLevels/dragonfly.png"
             },
             maxScore: 3500
         },
@@ -87,7 +88,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Schecke",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/snail.png")
+                path: "assets/playerLevels/snail.png"
             },
             maxScore: 4300
         },
@@ -96,7 +97,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Gecko",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/gecko.png")
+                path: "assets/playerLevels/gecko.png"
             },
             maxScore: 5100
         },
@@ -105,7 +106,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Maus",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/mouse.png")
+                path: "assets/playerLevels/mouse.png"
             },
             maxScore: 5900
         },
@@ -114,7 +115,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Kolibri",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/hummingbird.png")
+                path: "assets/playerLevels/hummingbird.png"
             },
             maxScore: 6700
         },
@@ -123,7 +124,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Seepferdchen",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/seahorse.png")
+                path: "assets/playerLevels/seahorse.png"
             },
             maxScore: 8500
         },
@@ -132,7 +133,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Frosch",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/frog.png")
+                path: "assets/playerLevels/frog.png"
             },
             maxScore: 9400
         },
@@ -141,7 +142,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Krebs",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/crab.png")
+                path: "assets/playerLevels/crab.png"
             },
             maxScore: 10300
         },
@@ -150,7 +151,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Fledermaus",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/bat.png")
+                path: "assets/playerLevels/bat.png"
             },
             maxScore: 11200
         },
@@ -159,7 +160,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Eichhörnchen",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/squirrel.png")
+                path: "assets/playerLevels/squirrel.png"
             },
             maxScore: 12100
         },
@@ -168,7 +169,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Clownfisch",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/clownfish.png")
+                path: "assets/playerLevels/clownfish.png"
             },
             maxScore: 13000
         },
@@ -177,7 +178,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Qualle",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/jellyfish.png")
+                path: "assets/playerLevels/jellyfish.png"
             },
             maxScore: 14000
         },
@@ -186,7 +187,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Igel",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/hedgehog.png")
+                path: "assets/playerLevels/hedgehog.png"
             },
             maxScore: 15000
         },
@@ -195,7 +196,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Tintenfisch",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/squid.png")
+                path: "assets/playerLevels/squid.png"
             },
             maxScore: 16000
         },
@@ -204,7 +205,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Hase",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/rabbit.png")
+                path: "assets/playerLevels/rabbit.png"
             },
             maxScore: 17000
         },
@@ -213,7 +214,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Falke",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/egyptian-bird.png")
+                path: "assets/playerLevels/egyptian-bird.png"
             },
             maxScore: 18000
         },
@@ -222,7 +223,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Katze",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/cat.png")
+                path: "assets/playerLevels/cat.png"
             },
             maxScore: 19000
         },
@@ -231,7 +232,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Flamingo",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/flamingo.png")
+                path: "assets/playerLevels/flamingo.png"
             },
             maxScore: 20000
         },
@@ -240,7 +241,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Pinguin",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/penguin.png")
+                path: "assets/playerLevels/penguin.png"
             },
             maxScore: 21000
         },
@@ -249,7 +250,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Koalabär",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/koala.png")
+                path: "assets/playerLevels/koala.png"
             },
             maxScore: 22000
         },
@@ -258,7 +259,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Widder",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/ram.png")
+                path: "assets/playerLevels/ram.png"
             },
             maxScore: 23000
         },
@@ -267,7 +268,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Kängeru",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/kangaroo.png")
+                path: "assets/playerLevels/kangaroo.png"
             },
             maxScore: 24000
         },
@@ -276,7 +277,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Delphin",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/dolphin.png")
+                path: "assets/playerLevels/dolphin.png"
             },
             maxScore: 25000
         },
@@ -285,7 +286,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Gorilla",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/gorilla.png")
+                path: "assets/playerLevels/gorilla.png"
             },
             maxScore: 26000
         },
@@ -294,7 +295,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Bär",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/bear-facing-right.png")
+                path: "assets/playerLevels/bear-facing-right.png"
             },
             maxScore: 27000
         },
@@ -303,7 +304,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Pferd",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/wild-black-horse-lifting-front-foot.png")
+                path: "assets/playerLevels/wild-black-horse-lifting-front-foot.png"
             },
             maxScore: 28000
         },
@@ -312,7 +313,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Dromedar",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/dromedary-facing-right.png")
+                path: "assets/playerLevels/dromedary-facing-right.png"
             },
             maxScore: 29000
         },
@@ -321,7 +322,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Giraffe",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/giraffe-facing-right.png")
+                path: "assets/playerLevels/giraffe-facing-right.png"
             },
             maxScore: 30000
         },
@@ -330,7 +331,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Nilpferd",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/hippopotamus-looking-right.png")
+                path: "assets/playerLevels/hippopotamus-looking-right.png"
             },
             maxScore: 31000
         },
@@ -339,7 +340,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Nashorn",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/rhinoceros-facing-right.png")
+                path: "assets/playerLevels/rhinoceros-facing-right.png"
             },
             maxScore: 32000
         },
@@ -348,7 +349,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Elefant",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/elephant.png")
+                path: "assets/playerLevels/elephant.png"
             },
             maxScore: 33000
         },
@@ -357,7 +358,7 @@ export const LevelUpTable: PlayerLevel[] =
             name: "Wal",
             icon: {
                 type: "local",
-                path: require("../../../assets/playerLevels/sperm-whale.png")
+                path: "assets/playerLevels/sperm-whale.png"
             },
             maxScore: 99999
         },
