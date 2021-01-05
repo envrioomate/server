@@ -32,7 +32,7 @@
     "@types/graphql-relay": "^0.4.9",
     "@types/redis": "^2.8.10",
     "apollo-upload-server": "^7.0.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.1",
     "class-validator": "^0.9.1",
