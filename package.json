@@ -74,7 +74,7 @@
     "shortid": "latest",
     "type-graphql": "^0.13.1",
     "typedi": "^0.8.0",
-    "typeorm": "0.2.7",
+    "typeorm": "0.2.25",
     "typeorm-typedi-extensions": "^0.2.1",
     "web-push": "^3.3.1"
   },
